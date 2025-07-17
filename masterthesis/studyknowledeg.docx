@@ -1,0 +1,429 @@
+NumPy 是 Python 的一个科学计算库，主要用于高效处理大型多维数组和矩阵。其语法结构主要包括：
+
+1. 导入模块
+import numpy as np
+
+2. 创建数组
+
+a = np.array([1, 2, 3])              # 一维数组
+b = np.array([[1, 2], [3, 4]])       # 二维数组
+c = np.zeros((2, 3))                 # 全零数组
+d = np.ones((3, 3))                  # 全一数组
+e = np.arange(0, 10, 2)              # 等差数组
+f = np.linspace(0, 1, 5)             # 等间隔数组
+
+3. 数组操作
+a.shape                              # 数组形状
+a.dtype                              # 数据类型
+a.reshape(3, 1)                      # 改变形状
+a.T                                  # 转置
+np.concatenate([a, a])               # 拼接
+
+4. 数组运算
+a + 1                                # 元素加法
+a * 2                                # 元素乘法
+np.dot(a, a)                         # 点积
+np.sum(a)                            # 求和
+np.mean(a)                           # 求均值
+
+5. 索引与切片
+a[0]                                 # 取第一个元素
+b[1, :]                              # 取第二行
+b[:, 0]                              # 取第一列
+a[a > 1]                             # 条件筛选
+
+6. 常用函数
+np.max(a)                            # 最大值
+np.min(a)                            # 最小值
+np.sort(a)                           # 排序
+
+NumPy 语法简洁高效，适合科学计算和数据分析。
+
+# 示例：基本操作
+import numpy as np
+
+# 创建数组
+arr = np.array([[1, 2, 3], [4, 5, 6]])
+print("原始数组：\n", arr)
+
+# 数组形状
+print("数组形状：", arr.shape)
+
+# 转置
+print("转置：\n", arr.T)
+
+# 改变形状
+reshaped = arr.reshape(3, 2)
+print("改变形状后的数组：\n", reshaped)
+
+# 数组运算
+print("数组加2：\n", arr + 2)
+print("数组乘3：\n", arr * 3)
+
+# 求和与均值
+print("所有元素求和：", np.sum(arr))
+print("所有元素均值：", np.mean(arr))
+
+# 索引与切片
+print("第一行：", arr[0])
+print("第二列：", arr[:, 1])
+print("大于3的元素：", arr[arr > 3])
+
+# 常用函数
+print("最大值：", np.max(arr))
+print("最小值：", np.min(arr))
+print("排序后：", np.sort(arr, axis=None))
+# Pandas 是 Python 的一个强大数据分析库，主要用于数据处理和分析。其语法结构主要包括：
+
+1. 导入模块
+import pandas as pd
+
+2. 创建数据结构
+# 创建 Series（一维数据）
+s = pd.Series([1, 2, 3, 4])
+
+# 创建 DataFrame（二维表格数据）
+df = pd.DataFrame({
+    'A': [1, 2, 3],
+    'B': [4, 5, 6]
+})
+
+3. 数据读取与写入
+# 读取 CSV 文件
+data = pd.read_csv('data.csv')
+
+# 写入 CSV 文件
+df.to_csv('output.csv', index=False)
+
+4. 数据查看与基本操作
+df.head()              # 查看前5行
+df.tail(3)             # 查看后3行
+df.shape               # 数据形状
+df.columns             # 列名
+df.info()              # 数据信息
+df.describe()          # 数据统计摘要
+
+5. 数据选择与切片
+df['A']                # 选择单列
+df[['A', 'B']]         # 选择多列
+df.iloc[0]             # 按位置选择第一行
+df.loc[0, 'A']         # 按标签选择元素
+df[df['A'] > 1]        # 条件筛选
+
+6. 数据处理
+df['C'] = df['A'] + df['B']    # 新增列
+df.drop('B', axis=1)           # 删除列
+df.sort_values('A')            # 按列排序
+df.fillna(0)                   # 缺失值填充
+
+# 示例：基本操作
+import pandas as pd
+
+
+
+# 创建 DataFrame
+data = {'姓名': ['张三', '李四', '王五'], '成绩': [90, 85, 88]}
+df = pd.DataFrame(data)
+print("原始数据：\n", df)
+
+
+# 查看数据
+print("前两行：\n", df.head(2))
+
+
+# 选择列
+print("成绩列：", df['成绩'])
+
+
+# 条件筛选
+print("成绩大于86的行：\n", df[df['成绩'] > 86])
+
+
+# 新增列
+df['等级'] = ['A', 'B', 'A']
+print("新增等级列后：\n", df)
+
+
+# 排序
+
+# 缺失值处理
+df_with_nan = pd.DataFrame({'A': [1, None, 3], 'B': [4, 5, None]})
+print("含缺失值的数据：\n", df_with_nan)
+print("用0填充缺失值：\n", df_with_nan.fillna(0))
+print("删除含缺失值的行：\n", df_with_nan.dropna())
+
+
+# 分组与聚合
+grouped = df.groupby('等级')['成绩'].mean()
+print("按等级分组后的平均成绩：\n", grouped)
+
+
+# 合并与连接
+df2 = pd.DataFrame({'姓名': ['张三', '李四'], '年龄': [20, 21]})
+merged = pd.merge(df, df2, on='姓名', how='left')
+print("合并后的数据：\n", merged)
+
+# 透视表
+pivot = df.pivot_table(index='等级', values='成绩', aggfunc='mean')
+print("透视表：\n", pivot)
+
+# PyTorch 是一个流行的深度学习框架，主要用于张量计算和自动求导。其语法结构主要包括：
+
+1. 导入模块
+import torch
+
+2. 创建张量
+a = torch.tensor([1, 2, 3])                # 一维张量
+b = torch.zeros((2, 3))                    # 全零张量
+c = torch.ones((3, 3))                     # 全一张量
+d = torch.arange(0, 10, 2)                 # 等差张量
+e = torch.linspace(0, 1, 5)                # 等间隔张量
+
+3. 张量操作
+a.shape                                   # 张量形状
+a.dtype                                   # 数据类型
+a.view(3, 1)                              # 改变形状
+a.t()                                     # 转置（二维张量）
+torch.cat([a, a])                         # 拼接
+
+4. 张量运算
+a + 1                                     # 元素加法
+a * 2                                     # 元素乘法
+torch.dot(a, a)                           # 点积
+torch.sum(a)                              # 求和
+torch.mean(a.float())                     # 求均值
+
+5. 索引与切片
+a[0]                                      # 取第一个元素
+b[1, :]                                   # 取第二行
+b[:, 0]                                   # 取第一列
+a[a > 1]                                  # 条件筛选
+
+6. 自动求导
+x = torch.tensor([2.0, 3.0], requires_grad=True)
+y = x ** 2 + 3 * x
+y.sum().backward()
+print(x.grad)                             # 梯度
+
+7. 常用函数
+torch.max(a)                              # 最大值
+torch.min(a)                              # 最小值
+torch.sort(a)                             # 排序
+
+# 示例：基本操作
+import torch
+
+# 创建张量
+arr = torch.tensor([[1, 2, 3], [4, 5, 6]])
+print("原始张量：\n", arr)
+
+# 张量形状
+print("张量形状：", arr.shape)
+
+# 转置
+print("转置：\n", arr.t())
+
+# 改变形状
+reshaped = arr.view(3, 2)
+print("改变形状后的张量：\n", reshaped)
+
+# 张量运算
+print("张量加2：\n", arr + 2)
+print("张量乘3：\n", arr * 3)
+
+# 求和与均值
+print("所有元素求和：", torch.sum(arr))
+print("所有元素均值：", torch.mean(arr.float()))
+
+# 索引与切片
+print("第一行：", arr[0])
+print("第二列：", arr[:, 1])
+print("大于3的元素：", arr[arr > 3])
+
+# 常用函数
+print("最大值：", torch.max(arr))
+print("最小值：", torch.min(arr))
+print("排序后：", torch.sort(arr.flatten()).values)
+# PyTorch 应用示例：简单的线性回归
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+# 生成数据 y = 2x + 1 + 噪声
+torch.manual_seed(0)
+x = torch.unsqueeze(torch.linspace(-1, 1, 100), dim=1)
+y = 2 * x + 1 + 0.2 * torch.rand(x.size())
+
+# 定义线性回归模型
+model = nn.Linear(1, 1)
+
+# 损失函数和优化器
+criterion = nn.MSELoss()
+optimizer = optim.SGD(model.parameters(), lr=0.1)
+
+# 训练模型
+for epoch in range(100):
+    pred = model(x)
+    loss = criterion(pred, y)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    if (epoch+1) % 20 == 0:
+        print(f"Epoch {epoch+1}: Loss = {loss.item():.4f}")
+
+# 查看学习到的参数
+# torch.nn 和 torch.optim 详解
+
+# torch.nn
+torch.nn 是 PyTorch 中用于构建神经网络的模块化工具包。它提供了丰富的神经网络层（如全连接层、卷积层、循环层等）、激活函数、损失函数等。常用组件包括：
+- nn.Module：所有神经网络模块的基类，自定义网络需继承它并实现 forward 方法。
+- nn.Linear：全连接层（线性层）。
+- nn.Conv2d：二维卷积层。
+- nn.ReLU、nn.Sigmoid、nn.Softmax：常用激活函数。
+- nn.CrossEntropyLoss、nn.MSELoss：常用损失函数。
+
+示例：
+import torch.nn as nn
+
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.fc1 = nn.Linear(10, 5)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(5, 1)
+
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# torch.optim
+torch.optim 提供了多种优化算法（如 SGD、Adam、RMSprop 等），用于更新神经网络参数以最小化损失函数。常用方法有：
+- optim.SGD：随机梯度下降。
+- optim.Adam：自适应矩估计优化器。
+- optimizer.step()：执行一次参数更新。
+- optimizer.zero_grad()：梯度清零，防止梯度累积。
+
+示例：
+import torch.optim as optim
+
+model = Net()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# 训练循环中常见用法
+optimizer.zero_grad()
+output = model(input)
+loss = criterion(output, target)
+loss.backward()
+optimizer.step()
+# 神经网络应用示例：手写数字识别（MNIST）
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms
+
+# 数据预处理
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+])
+
+# 下载并加载训练数据
+trainset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
+
+# 定义简单的神经网络
+class SimpleNet(nn.Module):
+    def __init__(self):
+        super(SimpleNet, self).__init__()
+        self.fc1 = nn.Linear(28*28, 128)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(128, 10)
+
+    def forward(self, x):
+        x = x.view(-1, 28*28)  # 展平成一维
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+model = SimpleNet()
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.1)
+
+# 训练网络
+for epoch in range(2):  # 只训练2轮
+    for images, labels in trainloader:
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    print(f"Epoch {epoch+1}: Loss = {loss.item():.4f}")
+
+# 测试单张图片
+test_img, _ = trainset[0]
+with torch.no_grad():
+    output = model(test_img.unsqueeze(0))
+    pred = torch.argmax(output, 1)
+    # 数据预处理是指对原始数据进行转换，使其适合神经网络训练。这里的 transform 做了两步操作：
+    # 1. transforms.ToTensor()：把PIL图片或numpy数组转换为PyTorch的张量（Tensor），并把像素值缩放到[0,1]。
+    # 2. transforms.Normalize((0.5,), (0.5,))：对每个像素做归一化处理，使其均值为0，方差为1（这里是把[0,1]缩放到[-1,1]）。
+    # 这样可以加快模型收敛速度，提高训练效果。
+
+    # Python 类的基本用法
+
+    # 定义类
+    class Person:
+        # 构造方法，初始化属性
+        def __init__(self, name, age):
+            self.name = name
+            self.age = age
+
+        # 实例方法
+        def greet(self):
+            print(f"你好，我是{self.name}，今年{self.age}岁。")
+
+    # 创建对象
+    p = Person("小明", 20)
+    p.greet()  # 输出：你好，我是小明，今年20岁。
+
+    # 类的继承
+    class Student(Person):
+        def __init__(self, name, age, grade):
+            super().__init__(name, age)  # 调用父类构造方法
+            self.grade = grade
+
+        def show_grade(self):
+            print(f"{self.name}的年级是{self.grade}")
+
+    s = Student("小红", 18, "高三")
+    s.greet()         # 继承父类方法
+    s.show_grade()    # 调用子类方法
+    # Python 支持多继承，即一个类可以继承多个父类。例如：
+
+    class A:
+        def foo(self):
+            print("A 的 foo 方法")
+
+    class B:
+        def bar(self):
+            print("B 的 bar 方法")
+
+    class C(A, B):
+        pass
+
+    c = C()
+    c.foo()  # 输出：A 的 foo 方法
+    c.bar()  # 输出：B 的 bar 方法
+
+    # 如果多个父类有同名方法，按照继承顺序（从左到右）查找。例如：
+
+    class D(A, B):
+        def foo(self):
+            print("D 覆盖了 foo 方法")
+
+    d = D()
+    d.foo()  # 输出：D 覆盖了 foo 方法
+    d.bar()  # 输出：B 的 bar 方法
