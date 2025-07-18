@@ -1,0 +1,9 @@
+https://www.bilibili.com/video/BV12o4y197US/?spm_id_from=333.337.search-card.all.click&vd_source=4ac3f54192c08a3e01498e119a44c1f1
+
+https://youtu.be/vmkRMvhCW5c
+课程主讲：王树森（史蒂文斯理工学院计算机科学系的终身制助理教授）
+课程内容：基本概念、价值学习、策略学习、Actor-Critic方法、AlphaGo、Monte Carlo (蒙特卡洛)
+课程资料：https://github.com/wangshusen/DRL
+
+
+下载链接：https://pan.baidu.com/s/1XpTgny_Vr0LobBsuYF4KkA 密码:x0wb
