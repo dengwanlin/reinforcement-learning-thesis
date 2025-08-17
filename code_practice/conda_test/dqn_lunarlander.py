@@ -31,14 +31,17 @@ env = RewardLogger(gym.make("LunarLander-v3"))
 model = DQN(
     policy="MlpPolicy",
     env=env,
-    verbose=1,
-    learning_rate=1e-3,
-    buffer_size=50000,
-    learning_starts=1000,
+    learning_rate=5e-4,                   # learning rate
+    buffer_size=100_000,                  # larger replay buffer
+    learning_starts=10000,               # start learning after more experiences
     batch_size=64,
     gamma=0.99,
     train_freq=4,
     target_update_interval=1000,
+    exploration_fraction=0.2,           # ε ratio from 1.0 to the minimum value
+    exploration_final_eps=0.05,
+    policy_kwargs=dict(net_arch=[256, 256]),
+    verbose=1,
     tensorboard_log="./tensorboard_logs/"
 )
 
