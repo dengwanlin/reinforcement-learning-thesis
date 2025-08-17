@@ -1,0 +1,57 @@
+# === Python bytecode ===
+__pycache__/
+*.py[cod]
+*.pyo
+
+# === VS Code / PyCharm ===
+.vscode/
+.idea/
+
+# === Jupyter Notebooks autosaves ===
+.ipynb_checkpoints/
+
+# === Conda environments ===
+env/
+.conda/
+*.conda
+*.env
+
+# === OS-specific ===
+.DS_Store
+Thumbs.db
+
+# === Model files / logs / outputs ===
+*.npy
+*.npz
+*.pth
+*.pt
+*.onnx
+*.h5
+*.ckpt
+*.pb
+*.joblib
+*.pkl
+
+# === TensorBoard logs ===
+tensorboard_logs/
+tb_logs/
+
+# === Plots and figures ===
+*.png
+*.jpg
+*.svg
+*.pdf
+
+# === Large shell installers ===
+Miniconda*.sh
+Anaconda*.sh
+
+# === ZIPs or compressed files ===
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+
+# === Custom folders ===
+code_practice/conda_test/lunarlander_model/
+Miniconda3-latest-Linux-x86_64.sh
