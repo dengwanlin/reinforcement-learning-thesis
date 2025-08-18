@@ -5,6 +5,17 @@ import matplotlib.pyplot as plt
 from stable_baselines3 import DQN
 from datetime import datetime
 
+# ========= Path Setup =========
+script_dir = os.path.dirname(os.path.abspath(__file__))
+model_dir = os.path.join(script_dir, "lunarlander_model")
+log_dir = os.path.join(script_dir, "tensorboard_logs")
+os.makedirs(model_dir, exist_ok=True)
+os.makedirs(log_dir, exist_ok=True)
+
+print(f"[INFO] Script directory: {script_dir}")
+print(f"[INFO] Model will be saved to: {model_dir}")
+print(f"[INFO] Tensorboard logs will be saved to: {log_dir}")
+
 # ========= Reward Logger =========
 episode_rewards = []
 
@@ -24,52 +35,47 @@ class RewardLogger(gym.Wrapper):
         self.episode_reward += reward
         return obs, reward, terminated, truncated, info
 
-# ========= Create & wrap env =========
+# ========= Create Environment =========
 env = RewardLogger(gym.make("LunarLander-v3"))
 
-# ========= Model config =========
+# ========= Model Configuration =========
 model = DQN(
     policy="MlpPolicy",
     env=env,
-    learning_rate=5e-4,                   # learning rate
-    buffer_size=100_000,                  # larger replay buffer
-    learning_starts=10000,               # start learning after more experiences
+    learning_rate=5e-4,
+    buffer_size=100_000,
+    learning_starts=10_000,
     batch_size=64,
     gamma=0.99,
     train_freq=4,
     target_update_interval=1000,
-    exploration_fraction=0.2,           # ε ratio from 1.0 to the minimum value
+    exploration_fraction=0.2,
     exploration_final_eps=0.05,
     policy_kwargs=dict(net_arch=[256, 256]),
     verbose=1,
-    tensorboard_log="./tensorboard_logs/"
+    tensorboard_log=log_dir
 )
 
-# ========= Train =========
+# ========= Train Model =========
 total_timesteps = 100_000
 model.learn(total_timesteps=total_timesteps)
 
-# ========= Save model and rewards =========
+# ========= Save Model and Rewards =========
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-model_dir = "code_practice/conda_test/lunarlander_model"
-os.makedirs(model_dir, exist_ok=True)
-
-
 model_path = os.path.join(model_dir, f"dqn_lunarlander_v3_{timestamp}")
 model.save(model_path)
-print(f"\n Model saved to: {model_path}.zip")
-
+print(f"\n✅ Model saved to: {model_path}.zip")
 
 reward_path = os.path.join(model_dir, "episode_rewards.npy")
 np.save(reward_path, episode_rewards)
-print(f" Saved {len(episode_rewards)} episode rewards to: {reward_path}")
+print(f"✅ Saved {len(episode_rewards)} episode rewards to: {reward_path}")
 
-# ========= Close env =========
+# ========= Close Environment =========
 env.close()
 
-# ========= Plot rewards =========
+# ========= Plot Rewards =========
 if len(episode_rewards) == 0:
-    print(" No rewards recorded, skipping plot.")
+    print("⚠️ No rewards recorded, skipping plot.")
 else:
     def smooth(y, box_pts=10):
         box = np.ones(box_pts) / box_pts
@@ -84,8 +90,8 @@ else:
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    
+
     reward_plot_path = os.path.join(model_dir, "reward_plot.png")
     plt.savefig(reward_plot_path)
     plt.show()
-    print(f" Reward plot saved to: {reward_plot_path}")
+    print(f"✅ Reward plot saved to: {reward_plot_path}")
