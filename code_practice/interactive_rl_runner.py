@@ -88,7 +88,7 @@ def resolve_project_root() -> Path:
 PROJECT_ROOT = resolve_project_root()
 
 # ---------- Options ----------
-ENVS  = ["CartPole-v1", "LunarLander-v3", "LunarLanderContinuous-v3", "Taxi-v3", "SuperMarioBros-1-1-v3"]
+ENVS  = ["CartPole-v1", "LunarLander-v3", "LunarLanderContinuous-v3", "Taxi-v3", "SuperMarioBros-1-1-v3","Humanoid-v4"]
 ALGOS = ["DQN", "PPO", "A2C", "SAC", "TD3"]  # Full set; will be filtered by action space
 
 CONFIGS = {
@@ -303,6 +303,64 @@ CONFIGS = {
                 policy_kwargs=dict(),  # default CNN
             ),
             "train": dict(total_timesteps=2_000_000, eval_freq=200_000, ckpt_freq=200_000),
+        },
+    },
+    "Humanoid-v4": {
+            "stop_threshold": float("inf"),  # no early-stop; training is long
+            "PPO": {
+            "model_kwargs": dict(
+                n_steps=8192,            # long rollouts help stability
+                batch_size=1024,
+                n_epochs=10,
+                gamma=0.99,
+                gae_lambda=0.95,
+                learning_rate=3e-4,
+                clip_range=0.2,
+                ent_coef=0.0,
+                vf_coef=0.5,
+                max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[256, 256], ortho_init=False),
+            ),
+            "train": dict(total_timesteps=10_000_000, eval_freq=100_000, ckpt_freq=500_000),
+        },
+        "A2C": {
+            "model_kwargs": dict(
+                n_steps=20,              # A2C is lightweight; expect weaker performance
+                gamma=0.99,
+                learning_rate=7e-4,
+                ent_coef=0.0,
+                vf_coef=0.5,
+                max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[256, 256]),
+            ),
+            "train": dict(total_timesteps=5_000_000, eval_freq=100_000, ckpt_freq=500_000),
+        },
+        "SAC": {
+            "model_kwargs": dict(
+                learning_rate=3e-4,
+                buffer_size=2_000_000,
+                batch_size=512,
+                tau=0.01,
+                gamma=0.99,
+                train_freq=(1, "step"),
+                gradient_steps=1,
+                ent_coef="auto",
+                policy_kwargs=dict(net_arch=[256, 256]),
+            ),
+            "train": dict(total_timesteps=10_000_000, eval_freq=100_000, ckpt_freq=500_000),
+        },
+        "TD3": {
+            "model_kwargs": dict(
+                learning_rate=3e-4,
+                buffer_size=2_000_000,
+                batch_size=512,
+                tau=0.01,
+                gamma=0.99,
+                train_freq=(1, "step"),
+                gradient_steps=1,
+                policy_kwargs=dict(net_arch=[400, 300]),
+            ),
+            "train": dict(total_timesteps=10_000_000, eval_freq=100_000, ckpt_freq=500_000),
         },
     },
 }
@@ -707,7 +765,6 @@ def main():
     train_env.close()
     eval_env.close()
     print("===== Training End =====\n")
-
 
 if __name__ == "__main__":
     main()
