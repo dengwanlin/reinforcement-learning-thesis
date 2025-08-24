@@ -88,7 +88,8 @@ def resolve_project_root() -> Path:
 PROJECT_ROOT = resolve_project_root()
 
 # ---------- Options ----------
-ENVS  = ["CartPole-v1", "LunarLander-v3", "SuperMarioBros-1-1-v3"]  # ← for Mario we use v3
+ENVS  = ["CartPole-v1", "LunarLander-v3", "SuperMarioBros-1-1-v3", "Taxi-v3"]
+
 ALGOS = ["DQN", "PPO", "A2C"]
 
 CONFIGS = {
@@ -236,7 +237,57 @@ CONFIGS = {
             "train": dict(total_timesteps=2_000_000, eval_freq=200_000, ckpt_freq=200_000),
         },
     },
+    "Taxi-v3": {
+        "stop_threshold": 8.0,  # Taxi perfect strategy average reward ~ 8
+        "DQN": {
+            "model_kwargs": dict(
+                learning_rate=1e-3,
+                buffer_size=50_000,
+                learning_starts=1_000,
+                batch_size=64,
+                gamma=0.99,
+                train_freq=(4, "step"),
+                gradient_steps=1,
+                target_update_interval=500,
+                exploration_fraction=0.2,
+                exploration_initial_eps=1.0,
+                exploration_final_eps=0.05,
+                policy_kwargs=dict(net_arch=[64, 64]),
+            ),
+            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
+        },
+        "PPO": {
+            "model_kwargs": dict(
+                n_steps=256,
+                batch_size=64,
+                n_epochs=4,
+                gamma=0.99,
+                gae_lambda=0.95,
+                learning_rate=3e-4,
+                clip_range=0.2,
+                ent_coef=0.0,
+                vf_coef=0.5,
+                max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[64, 64]),
+            ),
+            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
+        },
+        "A2C": {
+            "model_kwargs": dict(
+                n_steps=5,
+                gamma=0.99,
+                learning_rate=7e-4,
+                ent_coef=0.0,
+                vf_coef=0.5,
+                max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[64, 64]),
+            ),
+            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
+        },
+    },
 }
+
+
 
 # ---------- Helpers ----------
 def is_image_env(env_id: str) -> bool:
