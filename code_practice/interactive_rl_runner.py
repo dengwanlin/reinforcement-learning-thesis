@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Interactive SB3 runner in different environments with different algorithms
-- Envs: CartPole-v1 / LunarLander-v3 / SuperMarioBros-1-1-v3 with Super Mario Bros (Gym→Gymnasium bridge, built‑in wrappers)
+- Envs: CartPole-v1 / LunarLander-v3 / LunarLanderContinuous-v3 / Taxi-v3 / SuperMarioBros-1-1-v3
 - Choose env/algorithm/num_envs/VecNormalize via prompts
 - Auto CNN policy for image-based envs (Mario), MLP for classic control
 - Unified output: {PROJECT_ROOT}/runs/{ENV}/{ALGO}/{TIMESTAMP[-run_name]}/...
@@ -26,7 +26,7 @@ import numpy as np
 import gymnasium as gym
 import gym as oldgym  # for space conversion in the adapter
 
-from stable_baselines3 import DQN, PPO, A2C
+from stable_baselines3 import DQN, PPO, A2C, SAC, TD3
 from stable_baselines3.common.vec_env import (
     DummyVecEnv,
     SubprocVecEnv,
@@ -88,9 +88,8 @@ def resolve_project_root() -> Path:
 PROJECT_ROOT = resolve_project_root()
 
 # ---------- Options ----------
-ENVS  = ["CartPole-v1", "LunarLander-v3", "SuperMarioBros-1-1-v3", "Taxi-v3"]
-
-ALGOS = ["DQN", "PPO", "A2C"]
+ENVS  = ["CartPole-v1", "LunarLander-v3", "LunarLanderContinuous-v3", "Taxi-v3", "SuperMarioBros-1-1-v3"]
+ALGOS = ["DQN", "PPO", "A2C", "SAC", "TD3"]  # Full set; will be filtered by action space
 
 CONFIGS = {
     "CartPole-v1": {
@@ -189,6 +188,75 @@ CONFIGS = {
             "train": dict(total_timesteps=800_000, eval_freq=20_000, ckpt_freq=100_000),
         },
     },
+    "LunarLanderContinuous-v3": {
+        "stop_threshold": 200.0,
+        "PPO": {
+            "model_kwargs": dict(
+                n_steps=2048, batch_size=64, n_epochs=10, gamma=0.99, gae_lambda=0.95,
+                learning_rate=3e-4, clip_range=0.2, ent_coef=0.0, vf_coef=0.5, max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[256, 256]),
+            ),
+            "train": dict(total_timesteps=1_000_000, eval_freq=20_000, ckpt_freq=100_000),
+        },
+        "A2C": {
+            "model_kwargs": dict(
+                n_steps=5, gamma=0.99, learning_rate=7e-4, ent_coef=0.0, vf_coef=0.5, max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[256, 256]),
+            ),
+            "train": dict(total_timesteps=800_000, eval_freq=20_000, ckpt_freq=100_000),
+        },
+        "SAC": {
+            "model_kwargs": dict(
+                learning_rate=3e-4, buffer_size=1_000_000, batch_size=256, tau=0.02, gamma=0.99,
+                train_freq=(1, "step"), gradient_steps=1, ent_coef="auto",
+                policy_kwargs=dict(net_arch=[256, 256]),
+            ),
+            "train": dict(total_timesteps=1_000_000, eval_freq=20_000, ckpt_freq=100_000),
+        },
+        "TD3": {
+            "model_kwargs": dict(
+                learning_rate=3e-4, buffer_size=1_000_000, batch_size=256, tau=0.02, gamma=0.99,
+                train_freq=(1, "step"), gradient_steps=1,
+                policy_kwargs=dict(net_arch=[400, 300]),
+            ),
+            "train": dict(total_timesteps=1_000_000, eval_freq=20_000, ckpt_freq=100_000),
+        },
+    },
+    "Taxi-v3": {
+        "stop_threshold": 8.0,  # Perfect-policy average reward ~ 8
+        "DQN": {
+            "model_kwargs": dict(
+                learning_rate=1e-3,
+                buffer_size=50_000,
+                learning_starts=1_000,
+                batch_size=64,
+                gamma=0.99,
+                train_freq=(4, "step"),
+                gradient_steps=1,
+                target_update_interval=500,
+                exploration_fraction=0.2,
+                exploration_initial_eps=1.0,
+                exploration_final_eps=0.05,
+                policy_kwargs=dict(net_arch=[64, 64]),
+            ),
+            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
+        },
+        "PPO": {
+            "model_kwargs": dict(
+                n_steps=256, batch_size=64, n_epochs=4, gamma=0.99, gae_lambda=0.95,
+                learning_rate=3e-4, clip_range=0.2, ent_coef=0.0, vf_coef=0.5, max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[64, 64]),
+            ),
+            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
+        },
+        "A2C": {
+            "model_kwargs": dict(
+                n_steps=5, gamma=0.99, learning_rate=7e-4, ent_coef=0.0, vf_coef=0.5, max_grad_norm=0.5,
+                policy_kwargs=dict(net_arch=[64, 64]),
+            ),
+            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
+        },
+    },
     "SuperMarioBros-1-1-v3": {
         "stop_threshold": float("inf"),
         "DQN": {
@@ -237,57 +305,7 @@ CONFIGS = {
             "train": dict(total_timesteps=2_000_000, eval_freq=200_000, ckpt_freq=200_000),
         },
     },
-    "Taxi-v3": {
-        "stop_threshold": 8.0,  # Taxi perfect strategy average reward ~ 8
-        "DQN": {
-            "model_kwargs": dict(
-                learning_rate=1e-3,
-                buffer_size=50_000,
-                learning_starts=1_000,
-                batch_size=64,
-                gamma=0.99,
-                train_freq=(4, "step"),
-                gradient_steps=1,
-                target_update_interval=500,
-                exploration_fraction=0.2,
-                exploration_initial_eps=1.0,
-                exploration_final_eps=0.05,
-                policy_kwargs=dict(net_arch=[64, 64]),
-            ),
-            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
-        },
-        "PPO": {
-            "model_kwargs": dict(
-                n_steps=256,
-                batch_size=64,
-                n_epochs=4,
-                gamma=0.99,
-                gae_lambda=0.95,
-                learning_rate=3e-4,
-                clip_range=0.2,
-                ent_coef=0.0,
-                vf_coef=0.5,
-                max_grad_norm=0.5,
-                policy_kwargs=dict(net_arch=[64, 64]),
-            ),
-            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
-        },
-        "A2C": {
-            "model_kwargs": dict(
-                n_steps=5,
-                gamma=0.99,
-                learning_rate=7e-4,
-                ent_coef=0.0,
-                vf_coef=0.5,
-                max_grad_norm=0.5,
-                policy_kwargs=dict(net_arch=[64, 64]),
-            ),
-            "train": dict(total_timesteps=50_000, eval_freq=5_000, ckpt_freq=10_000),
-        },
-    },
 }
-
-
 
 # ---------- Helpers ----------
 def is_image_env(env_id: str) -> bool:
@@ -482,6 +500,22 @@ def make_env(env_id: str, seed: int=0):
         return env
     return _init
 
+# ---------- Algo filtering by action space ----------
+def algo_options_for_space(action_space) -> list[str]:
+    if isinstance(action_space, GmDiscrete):
+        return ["DQN", "PPO", "A2C"]
+    if isinstance(action_space, GmBox):
+        return ["PPO", "A2C", "SAC", "TD3"]
+    # For MultiDiscrete/MultiBinary and others, keep the most general
+    return ["PPO", "A2C"]
+
+def probe_action_space(env_id: str, seed: int = 0):
+    probe = DummyVecEnv([make_env(env_id, seed=seed)])
+    try:
+        return probe.action_space
+    finally:
+        probe.close()
+
 def build_paths(env_id: str, algo: str, run_name: str|None):
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     env_tag = env_id.replace("-", "_")
@@ -502,13 +536,16 @@ def build_paths(env_id: str, algo: str, run_name: str|None):
         paths[k].mkdir(parents=True, exist_ok=True)
     return paths
 
+# ---------- Model builder ----------
 def build_model(algo: str, env, tb_log: Path, seed: int, model_kwargs: dict, policy: str):
     common = dict(tensorboard_log=str(tb_log), verbose=1, seed=seed, policy=policy)
-    if algo=="DQN": return DQN(env=env, device="auto", **model_kwargs, **common)
-    if algo=="PPO": return PPO(env=env, device="auto", **model_kwargs, **common)
-    if algo=="A2C":
+    if algo == "DQN": return DQN(env=env, device="auto", **model_kwargs, **common)
+    if algo == "PPO": return PPO(env=env, device="auto", **model_kwargs, **common)
+    if algo == "A2C":
         device = "auto" if policy == "CnnPolicy" else "cpu"
         return A2C(env=env, device=device, **model_kwargs, **common)
+    if algo == "SAC": return SAC(env=env, device="auto", **model_kwargs, **common)
+    if algo == "TD3": return TD3(env=env, device="auto", **model_kwargs, **common)
     raise ValueError(f"Unsupported algo: {algo}")
 
 # ---------- Interactive helpers ----------
@@ -547,7 +584,18 @@ def main():
     print(f"[Path] Project root: {PROJECT_ROOT}")
 
     env_id = ask_choice("Environment", ENVS)
-    algo   = ask_choice("Algorithm", ALGOS)
+
+    # If selecting Mario but core packages are missing, stop early with a clear message
+    if is_image_env(env_id) and not _MARIO_AVAILABLE:
+        print("[Error] Super Mario Bros selected but gym-super-mario-bros/nes-py is not installed.")
+        print("        Try: pip install gym-super-mario-bros nes-py opencv-python")
+        sys.exit(1)
+
+    # Probe action space and filter algorithms accordingly
+    probe_space = probe_action_space(env_id, seed=0)
+    allowed_algos = algo_options_for_space(probe_space)
+    print(f"[Info] {env_id} action space = {type(probe_space).__name__} -> allowed algos: {allowed_algos}")
+    algo = ask_choice("Algorithm", allowed_algos)
 
     env_cfg  = CONFIGS[env_id]
     algo_cfg = env_cfg[algo]
@@ -585,6 +633,15 @@ def main():
     if use_vecnorm:
         train_env = VecNormalize(train_env, norm_obs=True,  norm_reward=True,  clip_obs=10.0)
         eval_env  = VecNormalize(eval_env,  norm_obs=True,  norm_reward=False, training=False)
+
+    # Safety checks: ensure algo matches action space
+    act_space = train_env.action_space
+    if algo in {"SAC", "TD3"} and not isinstance(act_space, GmBox):
+        print(f"[Error] {algo} requires continuous actions (Box), but got {type(act_space).__name__}.")
+        sys.exit(1)
+    if algo == "DQN" and not isinstance(act_space, GmDiscrete):
+        print(f"[Error] DQN requires discrete actions, but got {type(act_space).__name__}.")
+        sys.exit(1)
 
     policy = policy_for(env_id)
     model = build_model(algo, train_env, paths["tb"], seed, algo_cfg["model_kwargs"], policy)
