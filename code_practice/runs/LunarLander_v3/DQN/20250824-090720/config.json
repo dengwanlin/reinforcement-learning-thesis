@@ -1,0 +1,46 @@
+{
+  "env_id": "LunarLander-v3",
+  "algo": "DQN",
+  "seed": 0,
+  "total_timesteps": 1000000,
+  "eval_freq": 200000,
+  "ckpt_freq": 100000,
+  "num_envs": 1,
+  "use_vecnorm": false,
+  "stop_threshold": 200.0,
+  "model_kwargs": {
+    "learning_rate": 0.0005,
+    "buffer_size": 100000,
+    "learning_starts": 10000,
+    "batch_size": 64,
+    "gamma": 0.99,
+    "train_freq": [
+      4,
+      "step"
+    ],
+    "gradient_steps": 1,
+    "target_update_interval": 1000,
+    "exploration_fraction": 0.3,
+    "exploration_initial_eps": 1.0,
+    "exploration_final_eps": 0.05,
+    "policy_kwargs": {
+      "net_arch": [
+        256,
+        256
+      ]
+    }
+  },
+  "paths": {
+    "base": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720",
+    "tb": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/tb",
+    "best": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/best",
+    "ckpt": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/ckpt",
+    "models": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/models",
+    "monitor_train": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/monitor_train.csv",
+    "monitor_eval": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/monitor_eval.csv",
+    "vecnormalize": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/vecnormalize.pkl",
+    "config": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v3/DQN/20250824-090720/config.json"
+  },
+  "time": "2025-08-24T09:07:21",
+  "project_root": "/homes/sohawan2/reinforcement-learning-thesis/code_practice"
+}
