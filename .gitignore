@@ -47,7 +47,7 @@ Miniconda*.sh
 Anaconda*.sh
 
 # === ZIPs or compressed files ===
-*.zip
+#*.zip
 *.tar
 *.tar.gz
 *.tar.bz2
@@ -58,7 +58,7 @@ Miniconda3-latest-Linux-x86_64.sh
 
 # === cache from tensorboard ===
 runs/
-*.zip
+#*.zip
 *.pkl
 *.tmp
 *.egg-info/
