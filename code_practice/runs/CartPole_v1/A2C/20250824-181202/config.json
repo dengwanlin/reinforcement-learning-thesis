@@ -1,0 +1,46 @@
+{
+  "env_id": "CartPole-v1",
+  "algo": "A2C",
+  "policy": "MlpPolicy",
+  "seed": 0,
+  "total_timesteps": 300000,
+  "eval_freq": 10000,
+  "ckpt_freq": 50000,
+  "num_envs": 1,
+  "use_vecnorm": false,
+  "stop_threshold": 475.0,
+  "model_kwargs": {
+    "n_steps": 5,
+    "gamma": 0.99,
+    "learning_rate": 0.0007,
+    "ent_coef": 0.0,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "policy_kwargs": {
+      "net_arch": [
+        128,
+        128
+      ],
+      "optimizer_class": "<class 'torch.optim.rmsprop.RMSprop'>",
+      "optimizer_kwargs": {
+        "alpha": 0.99,
+        "eps": 1e-05,
+        "weight_decay": 0
+      }
+    }
+  },
+  "paths": {
+    "base": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202",
+    "tb": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/tb",
+    "best": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/best",
+    "ckpt": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/ckpt",
+    "models": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/models",
+    "monitor_train": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/monitor_train.csv",
+    "monitor_eval": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/monitor_eval.csv",
+    "vecnormalize": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/vecnormalize.pkl",
+    "config": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250824-181202/config.json"
+  },
+  "time": "2025-08-24T18:12:03",
+  "project_root": "/homes/sohawan2/reinforcement-learning-thesis/code_practice",
+  "mario_available": true
+}
