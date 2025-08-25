@@ -48,9 +48,9 @@ Anaconda*.sh
 
 # === ZIPs or compressed files ===
 #*.zip
-*.tar
-*.tar.gz
-*.tar.bz2
+#*.tar
+#*.tar.gz
+#*.tar.bz2
 
 # === Custom folders ===
 code_practice/conda_test/lunarlander_model/
@@ -59,6 +59,6 @@ Miniconda3-latest-Linux-x86_64.sh
 # === cache from tensorboard ===
 runs/
 #*.zip
-*.pkl
+#*.pkl
 *.tmp
 *.egg-info/
