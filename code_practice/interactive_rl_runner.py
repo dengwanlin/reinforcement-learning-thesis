@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Interactive SB3 runner in different environments with different algorithms
+Interactive Stable Baselines3 runner in different environments with different algorithms
 - Envs: CartPole-v1 / LunarLander-v3 / LunarLanderContinuous-v3 / Taxi-v3 / SuperMarioBros-1-1-v3
 - Choose env/algorithm/num_envs/VecNormalize via prompts
 - Auto CNN policy for image-based envs (Mario), MLP for classic control

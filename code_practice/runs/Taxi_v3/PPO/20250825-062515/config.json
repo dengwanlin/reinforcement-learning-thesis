@@ -1,0 +1,44 @@
+{
+  "env_id": "Taxi-v3",
+  "algo": "PPO",
+  "policy": "MlpPolicy",
+  "seed": 0,
+  "total_timesteps": 50000,
+  "eval_freq": 5000,
+  "ckpt_freq": 10000,
+  "num_envs": 1,
+  "use_vecnorm": false,
+  "stop_threshold": 8.0,
+  "model_kwargs": {
+    "n_steps": 256,
+    "batch_size": 64,
+    "n_epochs": 4,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "learning_rate": 0.0003,
+    "clip_range": 0.2,
+    "ent_coef": 0.0,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "policy_kwargs": {
+      "net_arch": [
+        64,
+        64
+      ]
+    }
+  },
+  "paths": {
+    "base": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515",
+    "tb": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/tb",
+    "best": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/best",
+    "ckpt": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/ckpt",
+    "models": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/models",
+    "monitor_train": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/monitor_train.csv",
+    "monitor_eval": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/monitor_eval.csv",
+    "vecnormalize": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/vecnormalize.pkl",
+    "config": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Taxi_v3/PPO/20250825-062515/config.json"
+  },
+  "time": "2025-08-25T06:25:16",
+  "project_root": "/homes/sohawan2/reinforcement-learning-thesis/code_practice",
+  "mario_available": true
+}

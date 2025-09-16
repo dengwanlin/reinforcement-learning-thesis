@@ -1,0 +1,43 @@
+{
+  "env_id": "SuperMarioBros-1-1-v3",
+  "algo": "DQN",
+  "policy": "CnnPolicy",
+  "seed": 0,
+  "total_timesteps": 3000000,
+  "eval_freq": 200000,
+  "ckpt_freq": 200000,
+  "num_envs": 1,
+  "use_vecnorm": false,
+  "stop_threshold": Infinity,
+  "model_kwargs": {
+    "learning_rate": 0.0001,
+    "buffer_size": 100000,
+    "learning_starts": 20000,
+    "batch_size": 32,
+    "gamma": 0.99,
+    "train_freq": [
+      4,
+      "step"
+    ],
+    "gradient_steps": 1,
+    "target_update_interval": 10000,
+    "exploration_fraction": 0.1,
+    "exploration_initial_eps": 1.0,
+    "exploration_final_eps": 0.01,
+    "policy_kwargs": {}
+  },
+  "paths": {
+    "base": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026",
+    "tb": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/tb",
+    "best": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/best",
+    "ckpt": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/ckpt",
+    "models": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/models",
+    "monitor_train": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/monitor_train.csv",
+    "monitor_eval": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/monitor_eval.csv",
+    "vecnormalize": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/vecnormalize.pkl",
+    "config": "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/DQN/20250916-112026/config.json"
+  },
+  "time": "2025-09-16T11:20:28",
+  "project_root": "/homes/sohawan2/reinforcement-learning-thesis/code_practice",
+  "mario_available": true
+}
