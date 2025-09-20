@@ -93,7 +93,7 @@ ALGOS = ["DQN", "PPO", "A2C", "SAC", "TD3"]  # Full set; will be filtered by act
 
 CONFIGS = {
     "CartPole-v1": {
-        "stop_threshold": 475.0,
+        "stop_threshold": float("inf"),
         "DQN": {
             "model_kwargs": dict(
                 learning_rate=1e-3,
@@ -113,7 +113,7 @@ CONFIGS = {
         },
         "PPO": {
             "model_kwargs": dict(
-                n_steps=1024,
+                n_steps=2048,
                 batch_size=64,
                 n_epochs=10,
                 gamma=0.99,
@@ -123,21 +123,21 @@ CONFIGS = {
                 ent_coef=0.0,
                 vf_coef=0.5,
                 max_grad_norm=0.5,
-                policy_kwargs=dict(net_arch=[128, 128]),
+                policy_kwargs=dict(net_arch=[64, 64]),
             ),
-            "train": dict(total_timesteps=300_000, eval_freq=10_000, ckpt_freq=50_000),
+            "train": dict(total_timesteps=300_000, eval_freq=5_000, ckpt_freq=10_000),
         },
         "A2C": {
             "model_kwargs": dict(
-                n_steps=5,
+                n_steps=64,
                 gamma=0.99,
-                learning_rate=7e-4,
-                ent_coef=0.0,
+                learning_rate=9e-5,
+                ent_coef=0.015,
                 vf_coef=0.5,
-                max_grad_norm=0.5,
-                policy_kwargs=dict(net_arch=[128, 128]),
+                max_grad_norm=0.2,
+                policy_kwargs=dict(net_arch=[64, 64]),
             ),
-            "train": dict(total_timesteps=300_000, eval_freq=10_000, ckpt_freq=50_000),
+            "train": dict(total_timesteps=300_000, eval_freq=5_000, ckpt_freq=50_000),
         },
     },
     "LunarLander-v3": {
