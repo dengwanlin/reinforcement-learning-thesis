@@ -4,11 +4,11 @@ import imageio
 import os
 
 # load the trained model
-model_path = "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250919-161001/models/last_a2c.zip"
+model_path = "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v2/PPO/20250921-122454-1e-4/best/best_model.zip"
 model = A2C.load(model_path)
 
 # create environment
-env = gym.make("CartPole-v1", render_mode="rgb_array")
+env = gym.make("LunarLander-v2", render_mode="rgb_array")
 frames = []
 obs, info = env.reset(seed=42)
 done = False
@@ -26,8 +26,8 @@ while not done and step_count < max_steps:
 env.close()
 
 # specify target directory and save GIF
-target_directory = "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/CartPole_v1/A2C/20250919-161001"
-gif_filename = "cartpole_a2c_demo.gif"
+target_directory = "/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/LunarLander_v2/PPO/20250921-122454-1e-4/best"
+gif_filename = "lunar_lander_ppo_demo.gif"
 output_path = os.path.join(target_directory, gif_filename)
 os.makedirs(target_directory, exist_ok=True)  # ensure directory exists
 imageio.mimsave(output_path, frames, fps=30, loop=0)
