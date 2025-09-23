@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Interactive Stable Baselines3 runner in different environments with different algorithms
-- Envs: CartPole-v1 / LunarLander-v3 / LunarLanderContinuous-v3 / Taxi-v3 / SuperMarioBros-1-1-v3
+- Envs: CartPole-v1 / LunarLander-v2 / LunarLanderContinuous-v2 / Taxi-v3 / SuperMarioBros-1-1-v3
 - Choose env/algorithm/num_envs/VecNormalize via prompts
 - Auto CNN policy for image-based envs (Mario), MLP for classic control
 - Unified output: {PROJECT_ROOT}/runs/{ENV}/{ALGO}/{TIMESTAMP[-run_name]}/...
@@ -17,6 +17,7 @@ Mario stack notes:
 
 from __future__ import annotations
 import json
+from nntplib import NNTP
 import os
 import sys
 from pathlib import Path
@@ -40,6 +41,8 @@ from stable_baselines3.common.callbacks import (
     StopTrainingOnRewardThreshold,
 )
 from stable_baselines3.common.evaluation import evaluate_policy
+#from stable_baselines3.common.utils import get_linear_schedule_fn
+
 
 # --- Try to import Mario core (only core pkgs) ---
 try:
@@ -49,6 +52,7 @@ try:
     _MARIO_AVAILABLE = True
 except Exception:
     _MARIO_AVAILABLE = False
+
 
 # ---------- Project root resolution ----------
 PREFERRED_ROOT = Path("/homes/sohawan2/reinforcement-learning-thesis/code_practice")
@@ -88,8 +92,16 @@ def resolve_project_root() -> Path:
 PROJECT_ROOT = resolve_project_root()
 
 # ---------- Options ----------
-ENVS  = ["CartPole-v1", "LunarLander-v3", "LunarLanderContinuous-v3", "Taxi-v3", "SuperMarioBros-1-1-v3","Humanoid-v4"]
+ENVS  = ["CartPole-v1", "LunarLander-v2", "LunarLanderContinuous-v2", "Taxi-v3", "SuperMarioBros-1-1-v3","Humanoid-v4"]
 ALGOS = ["DQN", "PPO", "A2C", "SAC", "TD3"]  # Full set; will be filtered by action space
+
+def linear_schedule(initial_value, final_value):
+    """
+    Returns a function that computes a linearly scheduled value from initial_value to final_value.
+    """
+    def func(progress_remaining):
+        return progress_remaining * (initial_value - final_value) + final_value
+    return func
 
 CONFIGS = {
     "CartPole-v1": {
@@ -140,8 +152,8 @@ CONFIGS = {
             "train": dict(total_timesteps=300_000, eval_freq=5_000, ckpt_freq=50_000),
         },
     },
-    "LunarLander-v3": {
-        "stop_threshold": 200.0,
+    "LunarLander-v2": {
+        "stop_threshold": float("inf"),
         "DQN": {
             "model_kwargs": dict(
                 learning_rate=5e-4,
@@ -165,31 +177,33 @@ CONFIGS = {
                 batch_size=64,
                 n_epochs=10,
                 gamma=0.99,
-                gae_lambda=0.95,
-                learning_rate=3e-4,
-                clip_range=0.2,
-                ent_coef=0.01,
+                gae_lambda=0.92,
+                learning_rate=1.2e-4,
+                clip_range=0.1,
+                ent_coef=0.015,
                 vf_coef=0.5,
                 max_grad_norm=0.5,
-                policy_kwargs=dict(net_arch=[256, 256]),
+                policy_kwargs=dict(net_arch=[512, 512]),
             ),
-            "train": dict(total_timesteps=1_000_000, eval_freq=20_000, ckpt_freq=100_000),
+            "train": dict(total_timesteps=2_000_000, eval_freq=20_000, ckpt_freq=100_000),
         },
         "A2C": {
             "model_kwargs": dict(
-                n_steps=5,
+                n_steps=8,
                 gamma=0.99,
-                learning_rate=7e-4,
-                ent_coef=0.01,
+                gae_lambda=0.95,
+                learning_rate=linear_schedule(1.8e-4, 5e-5),
+                ent_coef=0.1,
                 vf_coef=0.5,
                 max_grad_norm=0.5,
-                policy_kwargs=dict(net_arch=[256, 256]),
+                use_rms_prop=True,
+                policy_kwargs=dict(net_arch=[128, 128]),
             ),
-            "train": dict(total_timesteps=800_000, eval_freq=20_000, ckpt_freq=100_000),
+            "train": dict(total_timesteps=2_000_000, eval_freq=50_000, ckpt_freq=250_000,normalize=True),
         },
     },
-    "LunarLanderContinuous-v3": {
-        "stop_threshold": 200.0,
+    "LunarLanderContinuous-v2": {
+        "stop_threshold": float("inf"),
         "PPO": {
             "model_kwargs": dict(
                 n_steps=2048, batch_size=64, n_epochs=10, gamma=0.99, gae_lambda=0.95,
@@ -223,7 +237,7 @@ CONFIGS = {
         },
     },
     "Taxi-v3": {
-        "stop_threshold": 8.0,  # Perfect-policy average reward ~ 8
+        "stop_threshold": float("inf"),  # Perfect-policy average reward ~ 8
         "DQN": {
             "model_kwargs": dict(
                 learning_rate=1e-3,
