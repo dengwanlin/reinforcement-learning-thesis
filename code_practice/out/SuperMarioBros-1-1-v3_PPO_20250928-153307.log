@@ -40,3 +40,87 @@ Logging to /homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/Supe
 |    time_elapsed    | 23       |
 |    total_timesteps | 2048     |
 ---------------------------------
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 441         |
+|    ep_rew_mean          | 543         |
+| time/                   |             |
+|    fps                  | 87          |
+|    iterations           | 2           |
+|    time_elapsed         | 46          |
+|    total_timesteps      | 4096        |
+| train/                  |             |
+|    approx_kl            | 0.004705131 |
+|    clip_fraction        | 0.323       |
+|    clip_range           | 0.1         |
+|    entropy_loss         | -1.94       |
+|    explained_variance   | 0.000208    |
+|    learning_rate        | 0.00025     |
+|    loss                 | 203         |
+|    n_updates            | 10          |
+|    policy_gradient_loss | 0.00533     |
+|    value_loss           | 1e+03       |
+-----------------------------------------
+----------------------------------------
+| rollout/                |            |
+|    ep_len_mean          | 495        |
+|    ep_rew_mean          | 622        |
+| time/                   |            |
+|    fps                  | 87         |
+|    iterations           | 3          |
+|    time_elapsed         | 70         |
+|    total_timesteps      | 6144       |
+| train/                  |            |
+|    approx_kl            | 0.03549278 |
+|    clip_fraction        | 0.551      |
+|    clip_range           | 0.1        |
+|    entropy_loss         | -1.9       |
+|    explained_variance   | 0.565      |
+|    learning_rate        | 0.00025    |
+|    loss                 | 268        |
+|    n_updates            | 20         |
+|    policy_gradient_loss | 0.0402     |
+|    value_loss           | 663        |
+----------------------------------------
+----------------------------------------
+| rollout/                |            |
+|    ep_len_mean          | 565        |
+|    ep_rew_mean          | 635        |
+| time/                   |            |
+|    fps                  | 87         |
+|    iterations           | 4          |
+|    time_elapsed         | 93         |
+|    total_timesteps      | 8192       |
+| train/                  |            |
+|    approx_kl            | 0.01709589 |
+|    clip_fraction        | 0.386      |
+|    clip_range           | 0.1        |
+|    entropy_loss         | -1.89      |
+|    explained_variance   | 0.695      |
+|    learning_rate        | 0.00025    |
+|    loss                 | 305        |
+|    n_updates            | 30         |
+|    policy_gradient_loss | 0.0136     |
+|    value_loss           | 818        |
+----------------------------------------
+----------------------------------------
+| rollout/                |            |
+|    ep_len_mean          | 477        |
+|    ep_rew_mean          | 620        |
+| time/                   |            |
+|    fps                  | 88         |
+|    iterations           | 5          |
+|    time_elapsed         | 116        |
+|    total_timesteps      | 10240      |
+| train/                  |            |
+|    approx_kl            | 0.03464979 |
+|    clip_fraction        | 0.722      |
+|    clip_range           | 0.1        |
+|    entropy_loss         | -1.84      |
+|    explained_variance   | 0.777      |
+|    learning_rate        | 0.00025    |
+|    loss                 | 229        |
+|    n_updates            | 40         |
+|    policy_gradient_loss | 0.0649     |
+|    value_loss           | 571        |
+----------------------------------------
