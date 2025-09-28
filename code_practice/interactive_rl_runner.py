@@ -192,8 +192,8 @@ CONFIGS = {
                 n_steps=8,
                 gamma=0.99,
                 gae_lambda=0.95,
-                learning_rate=linear_schedule(1.8e-4, 5e-5),
-                ent_coef=0.1,
+                learning_rate=linear_schedule(1.5e-4, 3e-5),
+                ent_coef=0.05,
                 vf_coef=0.5,
                 max_grad_norm=0.5,
                 use_rms_prop=True,
@@ -292,31 +292,33 @@ CONFIGS = {
         },
         "PPO": {
             "model_kwargs": dict(
-                n_steps=128,
-                batch_size=256,
-                n_epochs=4,
+                n_steps=2048,
+                batch_size=258,
+                n_epochs=10,
                 gamma=0.99,
                 gae_lambda=0.95,
                 learning_rate=2.5e-4,
-                clip_range=0.1,
+                clip_range=0.2,
                 ent_coef=0.01,
                 vf_coef=0.5,
                 max_grad_norm=0.5,
-                policy_kwargs=dict(),  # default CNN
+                policy_kwargs=dict(),    # 使用默认CNN而非MLP
             ),
-            "train": dict(total_timesteps=2_000_000, eval_freq=200_000, ckpt_freq=200_000),
+            "train": dict(total_timesteps=2_000_000, eval_freq=100_000, ckpt_freq=100_000),
         },
         "A2C": {
             "model_kwargs": dict(
-                n_steps=5,
+                n_steps=16,
                 gamma=0.99,
-                learning_rate=7e-4,
-                ent_coef=0.01,
+                learning_rate=3e-4,
+                ent_coef=0.1,
                 vf_coef=0.5,
-                max_grad_norm=0.5,
-                policy_kwargs=dict(),  # default CNN
+                max_grad_norm=0.3,
+                policy_kwargs=dict(  # 自定义网络架构（可选）
+            net_arch=[dict(pi=[256, 256], vf=[256, 256])]  # 使用更大的MLP代替默认CNN，或调整CNN层
+        ),
             ),
-            "train": dict(total_timesteps=2_000_000, eval_freq=200_000, ckpt_freq=200_000),
+            "train": dict(total_timesteps=2_000_000, eval_freq=100_000, ckpt_freq=100_000),
         },
     },
     "Humanoid-v4": {
