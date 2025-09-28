@@ -1,0 +1,42 @@
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/homes/sohawan2/.local/lib/python3.10/site-packages/stable_baselines3/common/vec_env/base_vec_env.py:78: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+/homes/sohawan2/.local/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py:155: UserWarning: You have specified a mini-batch size of 258, but because the `RolloutBuffer` is of size `n_steps * n_envs = 2048`, after every 7 untruncated mini-batches, there will be a truncated mini-batch of size 242
+We recommend using a `batch_size` that is a factor of `n_steps * n_envs`.
+Info: (n_steps=2048 and n_envs=1)
+  warnings.warn(
+[Path] Using preferred root: /homes/sohawan2/reinforcement-learning-thesis/code_practice
+
+===== Stable‑Baselines3 Interactive Runner =====
+[Path] Project root: /homes/sohawan2/reinforcement-learning-thesis/code_practice
+[Info] SuperMarioBros-1-1-v3 action space = Discrete → allowed algos: ['DQN', 'PPO', 'A2C']
+Using cuda device
+
+===== Training Start =====
+{
+  "env_id": "SuperMarioBros-1-1-v3",
+  "algo": "PPO",
+  "policy": "CnnPolicy",
+  "seed": 0,
+  "total_timesteps": 2000000,
+  "num_envs": 1,
+  "use_vecnorm": false
+}
+Logging to /homes/sohawan2/reinforcement-learning-thesis/code_practice/runs/SuperMarioBros_1_1_v3/PPO/20250928-153310/tb/PPO_1
+/homes/sohawan2/miniconda3/envs/rl/lib/python3.10/site-packages/gym/utils/passive_env_checker.py:233: DeprecationWarning: `np.bool8` is a deprecated alias for `np.bool_`.  (Deprecated NumPy 1.24)
+  if not isinstance(terminated, (bool, np.bool8)):
+/homes/sohawan2/miniconda3/envs/rl/lib/python3.10/site-packages/gym_super_mario_bros/smb_env.py:148: RuntimeWarning: overflow encountered in scalar subtract
+  return (self.ram[0x86] - self.ram[0x071c]) % 256
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 458      |
+|    ep_rew_mean     | 528      |
+| time/              |          |
+|    fps             | 89       |
+|    iterations      | 1        |
+|    time_elapsed    | 23       |
+|    total_timesteps | 2048     |
+---------------------------------
