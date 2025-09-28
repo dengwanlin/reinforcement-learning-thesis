@@ -56,7 +56,7 @@ from rl_config import CONFIGS, ENVS, ALGOS   # ENVS / ALGOS / CONFIGS are define
 # --------------------------------------------------------------------------- #
 class Util:
     """General‑purpose utilities that are not tied to any business logic."""
-
+class Util:
     # ---------- File writability ----------
     @staticmethod
     def is_writable(path: Path) -> bool:
