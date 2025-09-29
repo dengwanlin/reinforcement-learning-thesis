@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-Interactive Stable‑Baselines3 runner (single‑file, refactored).
+Interactive Stable-Baselines3 runner (single-file, refactored).
 
 All helper functions are now grouped into small classes:
     Util, PathManager, EnvFactory, ModelFactory, CallbackFactory.
 The public entry point is still `Runner().run()`.
 
-The script can be used **interactively** (default) or **non‑interactively**
+The script can be used **interactively** (default) or **non-interactively**
 by passing ``--env`` and ``--algo`` on the command line (useful for
-nohup / cron jobs).  When the command‑line arguments are supplied the
-script skips all ``input()`` prompts and uses the default hyper‑parameters
+nohup / cron jobs).  When the command-line arguments are supplied the
+script skips all ``input()`` prompts and uses the default hyper-parameters
 from ``rl_config.py``.
 """
 
@@ -52,8 +52,7 @@ from rl_config import CONFIGS, ENVS, ALGOS   # ENVS / ALGOS / CONFIGS are define
 
 #  1. Utility class – interaction, dispatch, NumPy helpers
 # --------------------------------------------------------------------------- #
-class Util:
-    """General‑purpose utilities that are not tied to any business logic."""
+    # General-purpose utilities that are not tied to any business logic.
 class Util:
     # ---------- File writability ----------
     @staticmethod

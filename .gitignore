@@ -31,6 +31,7 @@ Thumbs.db
 *.pb
 *.joblib
 *.pkl
+*.log
 
 # === TensorBoard logs ===
 tensorboard_logs/
@@ -40,8 +41,7 @@ tb_logs/
 *.png
 *.jpg
 *.svg
-*.pdf
-
+#*.pdf
 # === Large shell installers ===
 Miniconda*.sh
 Anaconda*.sh
