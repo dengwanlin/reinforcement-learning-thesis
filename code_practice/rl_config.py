@@ -73,6 +73,8 @@ CONFIGS: Dict[str, Any] = {
             "train": dict(total_timesteps=300_000, eval_freq=5_000, ckpt_freq=50_000),
         },
     },
+
+    #one hyperparameter resource: https://github.com/alperenunlu/ppo-lunarlander-v2
     "LunarLander-v2": {
         "stop_threshold": float("inf"),
         "DQN": {
@@ -110,15 +112,15 @@ CONFIGS: Dict[str, Any] = {
         },
         "A2C": {
             "model_kwargs": dict(
-                n_steps=8,
+                n_steps=16,
                 gamma=0.99,
                 gae_lambda=0.95,
-                learning_rate=linear_schedule(1.5e-4, 3e-5),
-                ent_coef=0.05,
-                vf_coef=0.5,
+                learning_rate=linear_schedule(1e-4, 1e-5),
+                ent_coef=0.1,
+                vf_coef=0.25,
                 max_grad_norm=0.5,
                 use_rms_prop=True,
-                policy_kwargs=dict(net_arch=[128, 128]),
+                policy_kwargs=dict(net_arch=[256, 256]),
             ),
             "train": dict(total_timesteps=2_000_000, eval_freq=50_000, ckpt_freq=250_000,normalize=True),
         },

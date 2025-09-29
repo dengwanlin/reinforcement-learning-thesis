@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/homes/sohawan2/reinforcement-learning-thesis/code_practice/rl_runner.py", line 25, in <module>
+    import cv2
+ModuleNotFoundError: No module named 'cv2'
