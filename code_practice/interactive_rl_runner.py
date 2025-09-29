@@ -205,7 +205,7 @@ class EnvFactory:
         return space
 
     class GymToGymnasiumEnv(gym.Env):
-        """Wrap a classic‑Gym env so that Gymnasium wrappers accept it."""
+        """Wrap a classic-Gym env so that Gymnasium wrappers accept it."""
         metadata = {"render_modes": []}
 
         def __init__(self, old_env):
