@@ -112,17 +112,18 @@ CONFIGS: Dict[str, Any] = {
         },
         "A2C": {
             "model_kwargs": dict(
-                n_steps=16,
-                gamma=0.99,
+                n_steps=5,
+                gamma=0.995,
                 gae_lambda=0.95,
-                learning_rate=linear_schedule(1e-4, 1e-5),
-                ent_coef=0.1,
+                #learning_rate=linear_schedule(8.3e-4, 8.3e-6),
+                learning_rate=1e-05,                
+                ent_coef=1e-05,
                 vf_coef=0.25,
                 max_grad_norm=0.5,
                 use_rms_prop=True,
                 policy_kwargs=dict(net_arch=[256, 256]),
             ),
-            "train": dict(total_timesteps=2_000_000, eval_freq=50_000, ckpt_freq=250_000,normalize=True),
+            "train": dict(total_timesteps=2_000_000, eval_freq=50_000, ckpt_freq=250_000,normalize=False),
         },
     },
     "LunarLanderContinuous-v2": {
@@ -130,7 +131,7 @@ CONFIGS: Dict[str, Any] = {
         "PPO": {
             "model_kwargs": dict(
                 n_steps=2048, batch_size=64, n_epochs=10, gamma=0.99, gae_lambda=0.95,
-                learning_rate=3e-4, clip_range=0.2, ent_coef=0.0, vf_coef=0.5, max_grad_norm=0.5,
+                learning_rate=3e-4, clip_range=0.2, ent_coef=0.01, vf_coef=0.5, max_grad_norm=0.5,
                 policy_kwargs=dict(net_arch=[256, 256]),
             ),
             "train": dict(total_timesteps=1_000_000, eval_freq=20_000, ckpt_freq=100_000),

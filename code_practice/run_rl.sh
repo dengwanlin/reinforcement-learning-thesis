@@ -4,7 +4,7 @@
 
 # 1.  Default environment / algorithm (change them here if you like)
 
-ENV_VAL="SuperMarioBros-1-1-v3"   # default env
+ENV_VAL="LunarLander-v2"   # default env
 ALG_VAL="A2C"              # default algo
 
 

@@ -51,8 +51,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from rl_config import CONFIGS, ENVS, ALGOS   # ENVS / ALGOS / CONFIGS are defined in rl_config.py
 
 #  1. Utility class – interaction, dispatch, NumPy helpers
-# --------------------------------------------------------------------------- #
-    # General-purpose utilities that are not tied to any business logic.
+#  General-purpose utilities that are not tied to any business logic.
 class Util:
     # ---------- File writability ----------
     @staticmethod
@@ -237,7 +236,7 @@ class EnvFactory:
         return space
 
     class GymToGymnasiumEnv(gym.Env):
-        """Wrap a classic‑Gym env so that Gymnasium wrappers accept it."""
+        """Wrap a classic-Gym env so that Gymnasium wrappers accept it."""
         metadata = {"render_modes": []}
 
         def __init__(self, old_env):
@@ -265,7 +264,8 @@ class EnvFactory:
             if isinstance(out, tuple) and len(out) == 2:
                 return out
             return out, {}
-
+        def get_wrapper_attr(self, name: str) -> Any:  # Get an attribute from the wrapped environment.
+            return getattr(self._env, name)
         def step(self, action):
             out = self._env.step(action)
             if len(out) == 5:  # already gymnasium‑style
@@ -654,7 +654,8 @@ class Runner:
             self.ckpt_freq = self.util.ask_int(
                 "Checkpoint frequency", self.algo_cfg["train"]["ckpt_freq"]
             )
-            self.num_envs = self.util.ask_int("Number of parallel envs", 1)
+            default_n_envs = self.algo_cfg["train"].get("n_envs", 1)
+            self.num_envs = self.util.ask_int("Number of parallel envs", default_n_envs)
             self.use_vecnorm = self.util.ask_yes_no(
                 "Enable VecNormalize (obs/reward normalization)?", False
             )
@@ -665,7 +666,7 @@ class Runner:
             self.seed = 0
             self.eval_freq = self.algo_cfg["train"]["eval_freq"]
             self.ckpt_freq = self.algo_cfg["train"]["ckpt_freq"]
-            self.num_envs = 1
+            self.num_envs = self.algo_cfg["train"].get("n_envs", 1)
             self.use_vecnorm = False
             self.run_name = None
 
