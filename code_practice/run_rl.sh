@@ -4,8 +4,8 @@
 
 # 1.  Default environment / algorithm (change them here if you like)
 
-ENV_VAL="LunarLander-v2"   # default env
-ALG_VAL="A2C"              # default algo
+ENV_VAL="Hopper-v4"   # default env
+ALG_VAL="PPO"              # default algo
 
 
 # 2.  Allow the user to override the defaults on the command line
@@ -34,7 +34,7 @@ echo "[run_rl] LOGFILE = $LOGFILE"
 
 # 4.  Launch the trainer with nohup, forcing non‑interactive mode
 
-nohup python /homes/sohawan2/reinforcement-learning-thesis/code_practice/rl_runner.py \
+nohup python /homes/sohawan2/reinforcement-learning-thesis/code_practice/rl_runner(old).py \
     --env "$ENV_VAL" \
     --algo "$ALG_VAL" \
     --no-interactive \
