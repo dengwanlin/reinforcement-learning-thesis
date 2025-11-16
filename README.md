@@ -1,24 +1,12 @@
-⭐️ Reinforcement Learning Hyperparameter Analysis Framework
+<h1>Reinforcement Learning Hyperparameter Analysis Framework</h1>
 <div align="center"> <i>A systematic framework for studying how hyperparameters influence RL learning dynamics</i> </div>
-<br> <h2>📌 Overview</h2> <p style="font-size:16px; line-height:1.7;"> This project provides a flexible and automated framework to analyze the influence of <b>hyperparameters</b> on the training dynamics of popular reinforcement learning algorithms across multiple environments. It includes a custom Stable-Baselines3 runner, a full hyperparameter queue scheduler, and tools designed to help researchers evaluate convergence behavior, performance stability, and hyperparameter interactions. </p>
-<h2>⚙️ Supported Algorithms & Environments</h2>
-Algorithms (Stable-Baselines3)
+<br> <h2> Overview</h2> <p style="font-size:16px; line-height:1.7;"> This project provides a flexible and automated framework to analyze the influence of <b>hyperparameters</b> on the training dynamics of popular reinforcement learning algorithms across multiple environments. It includes a custom Stable-Baselines3 runner, a full hyperparameter queue scheduler, and tools designed to help researchers evaluate convergence behavior, performance stability, and hyperparameter interactions. </p>
+<h2> Supported Algorithms & Environments</h2>
+Algorithms (Stable-Baselines3) :A2C，PPO<br>
 
-A2C
+Environments :CartPole-v1, LunarLander-v3, LunarLanderContinuous-v3, Hopper-v4
 
-PPO
-
-Environments
-
-CartPole-v1
-
-LunarLander-v3
-
-LunarLanderContinuous-v3
-
-Hopper-v4
-
-<h2>📂 Main Components</h2>
+<h2> Main Components</h2>
 runner.py — Custom SB3 Experiment Runner
 <p style="font-size:15px; line-height:1.7;"> A unified interface for launching reproducible RL experiments. Supports CLI configuration, automatic model saving, evaluation, and consistent logging across environments. </p>
 
@@ -37,7 +25,7 @@ Sensitivity analysis
 
 Interaction studies
 
-<h2>📊 Research Questions & Analysis Goals</h2>
+<h2> Research Questions & Analysis Goals</h2>
 
 Below are the key analysis topics supported by the framework:
 
@@ -83,7 +71,7 @@ entropy × batch size
 
 n_steps × clip range
 
-<h2>🚀 Example Workflow</h2>
+<h2> Example Workflow</h2>
 
 Define hyperparameter ranges
 
@@ -97,7 +85,7 @@ Run analysis & visualization scripts
 
 Draw conclusions on best hyperparameters and stability patterns
 
-<h2>📈 Possible Extensions (Optional)</h2>
+<h2> Possible Extensions (Optional)</h2>
 
 Automatic visualization dashboard
 
@@ -107,4 +95,4 @@ Multi-environment benchmarking
 
 Add SB3 algorithms: SAC, TD3, DQN, DDPG
 
-<h2>📜 License</h2> MIT License (or your chosen license)
+
