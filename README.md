@@ -16,7 +16,7 @@ Example:
 
 python runner.py --env CartPole-v1 --algo PPO --learning-rate 3e-4 --gamma 0.99
 
-queue-runner.py — Hyperparameter Search Scheduler
+python queue_runner.py run --db queue.db --workdir . --workers 8 --timeout 7200
 <p style="font-size:15px; line-height:1.7;"> Automatically enumerates all combinations of hyperparameters and schedules them for execution. Ensures full coverage of the search space for: </p>
 
 Grid search
