@@ -2,257 +2,316 @@
 # -*- coding: utf-8 -*-
 
 """
-Stable-Baselines3 runner (non-interactive, CLI-only version)
-------------------------------------------------------------
+Custom Stable-Baselines3 runner
+--------------------------------
+Creates unique run directory:
+    <ROOT>/<ENV>/<ALGO>/<YYYYmmdd_HHMMSS_%f_pidXXXX_seedY>
 
-- 支持命令行参数： --env, --algo
-- 不再有任何 input() 或交互提示
-- 所有参数从 rl_config.py 加载
+Automatically saves:
+    - config.yml
+    - model.zip
+    - monitor.csv / vecmonitor.csv
+    - evaluations.npz
+    - tb/ (TensorBoard logs)
+    - results.json
+
+Supported algorithms: A2C, PPO, DQN, SAC, TD3
+
+Examples:
+    python runner.py --algo ppo --env CartPole-v1 -n 1e5 --progress
+    python runner.py --algo a2c --env LunarLander-v2 -n 2e5 --eval-freq 10000 --progress
+    python runner.py --algo sac --env Hopper-v4 -n 2e6 --device cuda --progress
+    python runner.py --algo ppo --env LunarLanderContinuous-v2 -n 1e6 \
+        --hyperparams learning_rate:3e-4 ent_coef:0.0 policy_kwargs:dict(net_arch=[256,256])
 """
 
 from __future__ import annotations
 import os
-import sys
 import json
 import argparse
 from pathlib import Path
 from datetime import datetime
+import yaml
+import warnings
 
 import gymnasium as gym
-from stable_baselines3 import DQN, PPO, A2C, SAC, TD3
-from stable_baselines3.common.vec_env import (
-    DummyVecEnv,
-    SubprocVecEnv,
-    VecMonitor,
-    VecNormalize,
-)
-from stable_baselines3.common.callbacks import (
-    EvalCallback,
-    CheckpointCallback,
-    StopTrainingOnRewardThreshold,
-)
+from stable_baselines3 import PPO, A2C
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor, VecNormalize
 from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
+from stable_baselines3.common.logger import configure as sb3_logger_config
 
-# 读取配置
-from rl_config import CONFIGS, ENVS
+# Root directory for all runs
+ROOT = Path("/homes/sohawan2/reinforcement-learning-thesis/code_practice/runs")
 
+ALGO_MAP = dict(ppo=PPO, a2c=A2C)
 
-# --------------------------------------------------------------------------- #
-# Path Manager
-# --------------------------------------------------------------------------- #
-class PathManager:
-    PREFERRED_ROOT = Path("/homes/sohawan2/reinforcement-learning-thesis/code_practice")
+# ---------------------------------------------------------------------------
+# Helper functions
+# ---------------------------------------------------------------------------
 
-    @staticmethod
-    def is_writable(path: Path) -> bool:
-        try:
-            path.mkdir(parents=True, exist_ok=True)
-            probe = path / ".tmp"
-            probe.write_text("ok")
-            probe.unlink(missing_ok=True)
-            return True
-        except Exception:
-            return False
-
-    def __init__(self):
-        self.project_root = self._resolve_root()
-
-    def _resolve_root(self) -> Path:
-        env_root = os.getenv("RL_PROJECT_ROOT")
-        if env_root and self.is_writable(Path(env_root)):
-            return Path(env_root).expanduser().resolve()
-        pref = self.PREFERRED_ROOT.expanduser().resolve()
-        if self.is_writable(pref):
-            return pref
-        fallback = Path(os.path.dirname(os.path.abspath(__file__))) / "rl_runs_root"
-        fallback.mkdir(exist_ok=True)
-        return fallback
-
-    def build_paths(self, env_id: str, algo: str) -> dict[str, Path]:
-        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-        env_tag = env_id.replace("-", "_")
-        base = self.project_root / "runs" / env_tag / algo.upper() / ts
-        paths = {
-            "base": base,
-            "tb": base / "tb",
-            "best": base / "best",
-            "ckpt": base / "ckpt",
-            "models": base / "models",
-            "monitor_train": base / "monitor_train.csv",
-            "monitor_eval": base / "monitor_eval.csv",
-            "vecnormalize": base / "vecnormalize.pkl",
-            "config": base / "config.json",
-        }
-        for k in ("tb", "best", "ckpt", "models"):
-            paths[k].mkdir(parents=True, exist_ok=True)
-        return paths
+def linear_schedule(initial_value: float):
+    """Return a callable that linearly decreases from the initial value."""
+    initial_value = float(initial_value)
+    def func(progress_remaining: float):
+        return progress_remaining * initial_value
+    return func
 
 
-# --------------------------------------------------------------------------- #
-# Env Factory
-# --------------------------------------------------------------------------- #
-class EnvFactory:
-    def make_env(self, env_id: str, seed: int = 0):
-        def _init():
-            env = gym.make(env_id)
-            env.reset(seed=seed)
-            return env
-        return _init
+SAFE_EVAL_ENV = {"__builtins__": None, "linear_schedule": linear_schedule}
 
-    @staticmethod
-    def algo_options_for_space(action_space):
-        if isinstance(action_space, gym.spaces.Discrete):
-            return ["DQN", "PPO", "A2C"]
-        elif isinstance(action_space, gym.spaces.Box):
-            return ["PPO", "A2C", "SAC", "TD3"]
+# Environment compatibility mapping
+ENV_COMPAT = {
+    "LunarLander-v2": "LunarLander-v3",
+    "LunarLanderContinuous-v2": "LunarLanderContinuous-v3",
+}
+
+def resolve_env_id(e: str) -> str:
+    """Map outdated env IDs to the latest version if needed."""
+    r = ENV_COMPAT.get(e, e)
+    if r != e:
+        warnings.warn(f"[compat] {e} -> {r}")
+    return r
+
+
+def parse_kv_list(kv_list):
+    """
+    Parse ["key:val", "k2:val2"] into a dictionary.
+    Supports automatic parsing of numeric, bool, None, and simple expressions, e.g.:
+        learning_rate:linear_schedule(3e-4)
+        policy_kwargs:dict(net_arch=[256,256])
+    """
+    out = {}
+    if not kv_list:
+        return out
+
+    SAFE_EVAL_ENV = {
+        "__builtins__": None,
+        "linear_schedule": linear_schedule,
+        "True": True,
+        "False": False,
+        "None": None,
+        "dict": dict,
+        "list": list,
+    }
+
+    for item in kv_list:
+        if ":" not in item:
+            raise ValueError(f"--hyperparams item must be key:val, got: {item}")
+        k, v = item.split(":", 1)
+        k = k.strip()
+        v = v.strip()
+
+        # Evaluate expressions or booleans
+        if v.lower() in {"true", "false", "none"} or any(ch in v for ch in "([{'") or "(" in v:
+            try:
+                out[k] = eval(v, SAFE_EVAL_ENV, {})
+            except Exception as e:
+                raise ValueError(f"Error parsing hyperparam {k}:{v} -> {e}")
         else:
-            return ["PPO", "A2C"]
+            # Try numeric, fallback to string
+            try:
+                out[k] = float(v) if ("." in v or "e" in v.lower()) else int(v)
+            except ValueError:
+                out[k] = v
+    return out
 
 
-# --------------------------------------------------------------------------- #
-# Model Factory
-# --------------------------------------------------------------------------- #
-class ModelFactory:
-    @staticmethod
-    def build_model(algo: str, env, tb_log, seed: int, model_kwargs: dict):
-        policy = "MlpPolicy"
-        common = dict(tensorboard_log=str(tb_log), verbose=1, seed=seed, policy=policy)
-        if algo == "DQN":
-            return DQN(env=env, device="auto", **model_kwargs, **common)
-        if algo == "PPO":
-            return PPO(env=env, device="auto", **model_kwargs, **common)
-        if algo == "A2C":
-            return A2C(env=env, device="cpu", **model_kwargs, **common)
-        if algo == "SAC":
-            return SAC(env=env, device="auto", **model_kwargs, **common)
-        if algo == "TD3":
-            return TD3(env=env, device="auto", **model_kwargs, **common)
-        raise ValueError(f"Unsupported algo: {algo}")
+def build_env(env_id: str, seed: int, normalize: bool, monitor_dir: Path):
+    """
+    Create a monitored (and optionally normalized) VecEnv with a single environment.
+    - Monitor writes per-episode rewards and lengths to monitor.csv
+    - VecNormalize optionally normalizes observations and rewards
+    """
+    monitor_dir.mkdir(parents=True, exist_ok=True)
+
+    def _make():
+        env = gym.make(env_id)
+        try:
+            env.reset(seed=seed)
+        except TypeError:
+            pass
+        env = Monitor(env, str(monitor_dir / "monitor.csv"))
+        return env
+
+    venv = DummyVecEnv([_make])
+    venv = VecMonitor(venv, filename=str(monitor_dir / "vecmonitor.csv"))
+
+    if normalize:
+        venv = VecNormalize(venv, norm_obs=True, norm_reward=True, clip_obs=10.0)
+    return venv
 
 
-# --------------------------------------------------------------------------- #
-# Callback Factory
-# --------------------------------------------------------------------------- #
-class CallbackFactory:
-    @staticmethod
-    def make_callbacks(eval_env, best_path, eval_freq, stop_threshold, ckpt_path, ckpt_freq, algo, env_id):
-        stop_cb = None
-        if stop_threshold != float("inf"):
-            stop_cb = StopTrainingOnRewardThreshold(reward_threshold=stop_threshold, verbose=1)
+def to_yaml_safe(obj):
+    """Convert arbitrary Python objects to YAML-safe representation."""
+    if isinstance(obj, (str, int, float, bool)) or obj is None:
+        return obj
+    if isinstance(obj, (list, tuple)):
+        return [to_yaml_safe(x) for x in obj]
+    if isinstance(obj, dict):
+        return {str(k): to_yaml_safe(v) for k, v in obj.items()}
+    if callable(obj):
+        name = getattr(obj, "__name__", None) or obj.__class__.__name__
+        if name == "func":
+            name = "linear_schedule()"
+        return f"<callable:{name}>"
+    return repr(obj)
 
-        eval_cb = EvalCallback(
-            eval_env,
-            best_model_save_path=str(best_path),
-            n_eval_episodes=5,
-            eval_freq=eval_freq,
-            deterministic=True,
-            render=False,
-            callback_after_eval=stop_cb,
-            verbose=1,
-        )
-        ckpt_cb = CheckpointCallback(
-            save_freq=ckpt_freq,
-            save_path=str(ckpt_path),
-            name_prefix=f"{algo.lower()}_{env_id.replace('-', '_')}",
-        )
-        return [eval_cb, ckpt_cb]
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
-
-# --------------------------------------------------------------------------- #
-# Runner (no interaction)
-# --------------------------------------------------------------------------- #
-class Runner:
-    def __init__(self, env_id: str, algo: str):
-        self.env_id = env_id
-        self.algo = algo
-        self.path_manager = PathManager()
-        self.env_factory = EnvFactory()
-        self.model_factory = ModelFactory()
-        self.callback_factory = CallbackFactory()
-
-        if env_id not in CONFIGS:
-            raise ValueError(f"Unknown environment: {env_id}")
-        if algo not in CONFIGS[env_id]:
-            raise ValueError(f"Algorithm {algo} not configured for {env_id}")
-
-        cfg = CONFIGS[env_id][algo]
-        self.stop_threshold = CONFIGS[env_id]["stop_threshold"]
-        self.total_timesteps = cfg["train"]["total_timesteps"]
-        self.eval_freq = cfg["train"]["eval_freq"]
-        self.ckpt_freq = cfg["train"]["ckpt_freq"]
-        self.seed = 0
-        self.num_envs = cfg["train"].get("n_envs", 1)
-        self.use_vecnorm = cfg["train"].get("normalize", False)
-        self.model_kwargs = cfg["model_kwargs"]
-        self.paths = self.path_manager.build_paths(env_id, algo)
-
-    def _build_envs(self):
-        env_fns = [self.env_factory.make_env(self.env_id, seed=self.seed + i) for i in range(self.num_envs)]
-        train_env = SubprocVecEnv(env_fns) if self.num_envs > 1 else DummyVecEnv(env_fns)
-        train_env = VecMonitor(train_env, filename=str(self.paths["monitor_train"]))
-
-        eval_env = DummyVecEnv([self.env_factory.make_env(self.env_id, seed=self.seed + 100)])
-        eval_env = VecMonitor(eval_env, filename=str(self.paths["monitor_eval"]))
-
-        if self.use_vecnorm:
-            train_env = VecNormalize(train_env, norm_obs=True, norm_reward=True, clip_obs=10.0)
-            eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=False, training=False)
-
-        self.train_env = train_env
-        self.eval_env = eval_env
-
-    def _dump_config(self):
-        run_config = {
-            "env_id": self.env_id,
-            "algo": self.algo,
-            "seed": self.seed,
-            "total_timesteps": self.total_timesteps,
-            "eval_freq": self.eval_freq,
-            "ckpt_freq": self.ckpt_freq,
-            "num_envs": self.num_envs,
-            "use_vecnorm": self.use_vecnorm,
-            "stop_threshold": self.stop_threshold,
-            "model_kwargs": self.model_kwargs,
-            "paths": {k: str(v) for k, v in self.paths.items()},
-            "time": datetime.now().isoformat(timespec="seconds"),
-            "project_root": str(self.path_manager.project_root),
-        }
-        with open(self.paths["config"], "w", encoding="utf-8") as f:
-            json.dump(run_config, f, indent=2, ensure_ascii=False, default=str)
-
-    def run(self):
-        print(f"\n=== Training {self.algo} on {self.env_id} ===")
-        self._build_envs()
-        model = self.model_factory.build_model(self.algo, self.train_env, self.paths["tb"], self.seed, self.model_kwargs)
-        callbacks = self.callback_factory.make_callbacks(
-            self.eval_env, self.paths["best"], self.eval_freq,
-            self.stop_threshold, self.paths["ckpt"], self.ckpt_freq, self.algo, self.env_id
-        )
-        self._dump_config()
-
-        model.learn(total_timesteps=self.total_timesteps, callback=callbacks, progress_bar=True)
-
-        mean_r, std_r = evaluate_policy(model, self.eval_env, n_eval_episodes=10, deterministic=True)
-        print(f"Final evaluation on {self.env_id}: mean={mean_r:.2f} ± {std_r:.2f}")
-
-        model.save(str(self.paths["models"] / f"last_{self.algo.lower()}"))
-        print(f"Saved final model to {self.paths['models']}")
-
-        self.train_env.close()
-        self.eval_env.close()
-        print("=== Training Complete ===\n")
-
-
-# --------------------------------------------------------------------------- #
-# CLI
-# --------------------------------------------------------------------------- #
 def main():
-    parser = argparse.ArgumentParser(description="SB3 Runner (non-interactive)")
-    parser.add_argument("--env", required=True, help="Environment ID (e.g. CartPole-v1)")
-    parser.add_argument("--algo", required=True, help="Algorithm (e.g. PPO, A2C, SAC, TD3, DQN)")
+    parser = argparse.ArgumentParser("Custom SB3 Runner")
+    parser.add_argument("--algo", required=True, choices=ALGO_MAP.keys())
+    parser.add_argument("--env", required=True)
+    parser.add_argument("-n", "--n-timesteps", default="1e6",
+                        help="Total timesteps (accepts scientific notation, e.g., 1e6)")
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--device", default="auto")
+    parser.add_argument("--normalize", action="store_true",
+                        help="Enable VecNormalize for obs/reward normalization")
+    parser.add_argument("--eval-freq", type=int, default=None,
+                        help="Evaluate every N steps and save best model")
+    parser.add_argument("--eval-episodes", type=int, default=10)
+    parser.add_argument("--save-freq", type=int, default=None,
+                        help="Save checkpoints every N steps")
+    parser.add_argument("--hyperparams", nargs="+", default=[],
+                        help="Override hyperparameters as key:val pairs")
+    parser.add_argument("--progress", action="store_true")
     args = parser.parse_args()
 
-    Runner(env_id=args.env, algo=args.algo).run()
+    # -----------------------------------------------------------------------
+    # Unique run directory
+    # -----------------------------------------------------------------------
+    env_id = resolve_env_id(args.env)
+    now = datetime.now()
+    print(f"printing now {now}")
+    ts_base = now.strftime("%Y%m%d_%H%M%S_%f_%f")# use the uuid to replace pid and seed 
+    unique_tag = f"{ts_base}_pid{os.getpid()}_seed{args.seed}"
+    run_dir = ROOT / env_id / args.algo / unique_tag
+    run_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[unique tag] {unique_tag}")
+    print(f"[run dir] {run_dir}")
+    #add print to check the run directory
+    # -----------------------------------------------------------------------
+    # Parse and save configuration
+    # -----------------------------------------------------------------------
+    user_hparams = parse_kv_list(args.hyperparams)
+    base_cfg = {
+        "env_id": env_id,
+        "algo": args.algo,
+        "seed": args.seed,
+        "device": args.device,
+        "n_timesteps": args.n_timesteps,
+        "normalize": args.normalize,
+        "eval_freq": args.eval_freq,
+        "eval_episodes": args.eval_episodes,
+        "save_freq": args.save_freq,
+        "timestamp": ts_base,
+        "pid": os.getpid(),
+        "runner": "custom-sb3",
+        "hyperparams_raw": args.hyperparams,
+        "hyperparams_parsed": to_yaml_safe(user_hparams),
+    }
+    with open(run_dir / "config.yml", "w") as f:
+        yaml.safe_dump(base_cfg, f, allow_unicode=True, sort_keys=False)
+
+    # -----------------------------------------------------------------------
+    # Create training and evaluation environments
+    # -----------------------------------------------------------------------
+    env = build_env(env_id, args.seed, args.normalize, run_dir)
+    eval_env = build_env(env_id, args.seed + 100, args.normalize, run_dir / "eval")
+
+    # Share normalization stats between train and eval
+    if args.normalize:
+        eval_env.obs_rms = env.obs_rms
+        eval_env.ret_rms = env.ret_rms
+        eval_env.training = False
+
+    # -----------------------------------------------------------------------
+    # Initialize model
+    # -----------------------------------------------------------------------
+    Algo = ALGO_MAP[args.algo]
+    model_kwargs = dict(
+        policy="MlpPolicy",
+        env=env,
+        tensorboard_log=str(run_dir),
+        device=args.device,
+        seed=args.seed,
+        verbose=1 if args.progress else 0,
+        **user_hparams,
+    )
+    model = Algo(**model_kwargs)
+
+    # -----------------------------------------------------------------------
+    # Configure SB3 logger
+    # -----------------------------------------------------------------------
+    logger = sb3_logger_config(
+        folder=str(run_dir),
+        format_strings=["stdout", "csv", "tensorboard"]
+    )
+    model.set_logger(logger)
+
+    # -----------------------------------------------------------------------
+    # Prepare callbacks
+    # -----------------------------------------------------------------------
+    callbacks = []
+    (run_dir / "best").mkdir(parents=True, exist_ok=True)
+    (run_dir / "eval").mkdir(parents=True, exist_ok=True)
+    (run_dir / "ckpt").mkdir(parents=True, exist_ok=True)
+
+    if args.eval_freq:
+        eval_cb = EvalCallback(
+            eval_env,
+            best_model_save_path=str(run_dir / "best"),
+            log_path=str(run_dir / "eval"),
+            eval_freq=args.eval_freq,
+            n_eval_episodes=args.eval_episodes,
+            deterministic=True,
+            render=False,
+        )
+        callbacks.append(eval_cb)
+    if args.save_freq:
+        ckpt_cb = CheckpointCallback(
+            save_freq=args.save_freq,
+            save_path=str(run_dir / "ckpt"),
+            name_prefix="model",
+            verbose=1,
+        )
+        callbacks.append(ckpt_cb)
+
+    # -----------------------------------------------------------------------
+    # Training
+    # -----------------------------------------------------------------------
+    print(f"[run] {env_id} | {args.algo} | saving to: {run_dir}")
+    total_timesteps = int(float(args.n_timesteps))
+    model.learn(
+        total_timesteps=total_timesteps,
+        tb_log_name="tb",
+        callback=callbacks or None,
+        progress_bar=args.progress,
+    )
+
+    # -----------------------------------------------------------------------
+    # Evaluation and saving
+    # -----------------------------------------------------------------------
+    mean_r, std_r = evaluate_policy(
+        model, eval_env, n_eval_episodes=args.eval_episodes, deterministic=True
+    )
+    print(f"[eval] mean={mean_r:.2f} ± {std_r:.2f} over {args.eval_episodes} episodes")
+
+    model.save(str(run_dir / f"{args.env}.zip"))
+
+    if args.normalize:
+        env.save(str(run_dir / "vecnormalize.pkl"))
+
+    summary = {"mean_reward": float(mean_r), "std_reward": float(std_r)}
+    with open(run_dir / "results.json", "w") as f:
+        json.dump(summary, f, indent=2)
+
+    print(f"[done] TensorBoard: tensorboard --logdir {ROOT}")
 
 
 if __name__ == "__main__":

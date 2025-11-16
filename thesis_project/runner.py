@@ -160,7 +160,7 @@ def to_yaml_safe(obj):
 
 # ---------------------------------------------------------------------------
 # Main
-# ---------------------------------------------------------------------------
+
 def main():
     parser = argparse.ArgumentParser("Custom SB3 Runner")
     parser.add_argument("--algo", required=True, choices=ALGO_MAP.keys(),
