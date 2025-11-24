@@ -21,7 +21,7 @@ Supported algorithms: A2C, PPO
 Examples:
     python runner.py --algo ppo --env LunarLander-v3
     python runner.py --algo ppo --env LunarLanderContinuous-v2 \
-        --hyperparams learning_rate:3e-4 ent_coef:0.0 policy_kwargs:dict(net_arch=[256,256])
+        --hyperparams learning_rate:3e-4 ent_coef:0.0 policy_kwargs:dict(net_arch=[256,256])--seed 42
 """
 
 from __future__ import annotations
@@ -35,6 +35,11 @@ import warnings
 import uuid
 import sys
 import gymnasium as gym
+
+import random
+import numpy as np
+import torch
+
 from stable_baselines3 import PPO, A2C
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor, VecNormalize
@@ -169,18 +174,23 @@ def main():
                         help="Environment ID, e.g. CartPole-v1 or LunarLander-v3.")
     parser.add_argument("--hyperparams", nargs="+", default=[],
                         help="Optional hyperparameters in key:val format.")
+    parser.add_argument("--seed", type=int, default=0,
+                        help="Random seed for reproducibility.")
     args = parser.parse_args()
 
     # -----------------------------------------------------------------------
     # Fixed defaults (not exposed as CLI args)
     # -----------------------------------------------------------------------
-    seed = 0
+    seed = args.seed
     device = "auto"
     normalize = False
     eval_freq = 20_000
     eval_episodes = 10
     save_freq = 100_000
-
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.set_num_threads(1)
     # automatically set steps based on algo and env
     DEFAULT_STEPS = {
         ("ppo", "CartPole-v1"): 200_000,
@@ -204,7 +214,7 @@ def main():
     run_dir = ROOT / env_id / args.algo / unique_tag
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    # ✅ new log directory for stdout logging
+
     log_dir = run_dir / "log"
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file_path = log_dir / "progress.log"

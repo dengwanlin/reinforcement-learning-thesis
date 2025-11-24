@@ -1,0 +1,42 @@
+env,algo,hyperparam,value,count,freq,num_success_configs
+CartPole-v1,a2c,learning_rate,0.001,224,0.34146341463414637,656
+CartPole-v1,a2c,learning_rate,0.0007,189,0.28810975609756095,656
+CartPole-v1,a2c,learning_rate,0.0003,153,0.23323170731707318,656
+CartPole-v1,a2c,learning_rate,0.0001,90,0.13719512195121952,656
+CartPole-v1,ppo,learning_rate,0.0003,529,0.3337539432176656,1585
+CartPole-v1,ppo,learning_rate,0.0001,528,0.3331230283911672,1585
+CartPole-v1,ppo,learning_rate,0.001,528,0.3331230283911672,1585
+CartPole-v1,a2c,n_steps,64,256,0.3902439024390244,656
+CartPole-v1,a2c,n_steps,128,205,0.3125,656
+CartPole-v1,a2c,n_steps,256,195,0.2972560975609756,656
+CartPole-v1,ppo,n_steps,128,577,0.3640378548895899,1585
+CartPole-v1,ppo,n_steps,256,576,0.3634069400630915,1585
+CartPole-v1,ppo,n_steps,512,432,0.2725552050473186,1585
+CartPole-v1,ppo,batch_size,64.0,864,0.5451104100946372,1585
+CartPole-v1,ppo,batch_size,32.0,721,0.45488958990536277,1585
+CartPole-v1,ppo,n_epochs,10.0,865,0.5457413249211357,1585
+CartPole-v1,ppo,n_epochs,20.0,720,0.45425867507886436,1585
+CartPole-v1,a2c,gamma,0.99,329,0.5015243902439024,656
+CartPole-v1,a2c,gamma,0.995,327,0.49847560975609756,656
+CartPole-v1,ppo,gamma,0.99,793,0.5003154574132492,1585
+CartPole-v1,ppo,gamma,0.995,792,0.49968454258675077,1585
+CartPole-v1,ppo,clip_range,0.2,793,0.5003154574132492,1585
+CartPole-v1,ppo,clip_range,0.3,792,0.49968454258675077,1585
+CartPole-v1,a2c,gae_lambda,0.95,335,0.510670731707317,656
+CartPole-v1,a2c,gae_lambda,0.9,321,0.4893292682926829,656
+CartPole-v1,ppo,gae_lambda,0.9,793,0.5003154574132492,1585
+CartPole-v1,ppo,gae_lambda,0.95,792,0.49968454258675077,1585
+CartPole-v1,a2c,ent_coef,0.0,332,0.5060975609756098,656
+CartPole-v1,a2c,ent_coef,0.001,324,0.49390243902439024,656
+CartPole-v1,ppo,ent_coef,0.0,529,0.3337539432176656,1585
+CartPole-v1,ppo,ent_coef,0.01,528,0.3331230283911672,1585
+CartPole-v1,ppo,ent_coef,0.02,528,0.3331230283911672,1585
+CartPole-v1,a2c,vf_coef,0.5,656,1.0,656
+CartPole-v1,ppo,vf_coef,0.5,1585,1.0,1585
+CartPole-v1,a2c,max_grad_norm,0.5,656,1.0,656
+CartPole-v1,ppo,max_grad_norm,0.5,1585,1.0,1585
+CartPole-v1,ppo,target_kl,0.02,1585,1.0,1585
+CartPole-v1,a2c,policy_kwargs.net_arch,"[128, 128]",376,0.573170731707317,656
+CartPole-v1,a2c,policy_kwargs.net_arch,"[64, 64]",280,0.4268292682926829,656
+CartPole-v1,ppo,policy_kwargs.net_arch,"[64, 64]",793,0.5003154574132492,1585
+CartPole-v1,ppo,policy_kwargs.net_arch,"[128, 128]",792,0.49968454258675077,1585

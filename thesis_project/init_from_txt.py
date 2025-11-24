@@ -23,6 +23,10 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--cmd-file", required=True, help="text commands file, one per line")
     p.add_argument("--db", required=True, help="the path of SQLite, such as queue.db")
+
+    # ⭐ NEW: allow injecting a global seed
+    p.add_argument("--seed", type=int, help="Inject this seed into every command")
+
     args = p.parse_args()
 
     os.makedirs(os.path.dirname(os.path.abspath(args.db)), exist_ok=True)
@@ -34,7 +38,7 @@ def main():
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            # allow status prefix, e.g. "1|python train.py ..."
+
             status = 0
             cmd = line
             if "|" in line[:3]:
@@ -42,7 +46,34 @@ def main():
                 if maybe.strip() in ("0","1"):
                     status = int(maybe.strip())
                     cmd = rest.strip()
-            conn.execute("INSERT OR IGNORE INTO jobs(cmd,status) VALUES(?,?)", (cmd, status))
+
+            # ⭐ NEW: inject seed if provided
+            if args.seed is not None:
+                if "--seed" in cmd:
+                    # Replace existing seed value
+                    parts = cmd.split()
+                    new_parts = []
+                    skip = False
+                    for tok in parts:
+                        if skip:
+                            skip = False
+                            continue
+                        if tok == "--seed":
+                            new_parts.extend(["--seed", str(args.seed)])
+                            skip = True
+                        elif tok.startswith("--seed="):
+                            new_parts.append(f"--seed={args.seed}")
+                        else:
+                            new_parts.append(tok)
+                    cmd = " ".join(new_parts)
+                else:
+                    # Append seed
+                    cmd = f"{cmd} --seed {args.seed}"
+
+            conn.execute(
+                "INSERT OR IGNORE INTO jobs(cmd,status) VALUES(?,?)",
+                (cmd, status)
+            )
 
     conn.commit()
     cur = conn.execute("SELECT COUNT(*), SUM(CASE WHEN status=1 THEN 1 ELSE 0 END) FROM jobs")

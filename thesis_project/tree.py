@@ -8,10 +8,10 @@ def print_directory_tree(path, prefix="", is_last=True):
     try:
         items = os.listdir(path)
     except PermissionError:
-        print(f"{prefix}⚠️  can not be accessed:{path}as rights not enough")
+        print(f"{prefix}  can not be accessed:{path}as rights not enough")
         return
     except Exception as e:
-        print(f"{prefix}❌ error:{e}")
+        print(f"{prefix} error:{e}")
         return
 
     # sorting, to make the output better
