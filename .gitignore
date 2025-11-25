@@ -71,4 +71,5 @@ logs/
 docs/
 code_practice/
 
-.pdf
+*.pdf
+*.csv
