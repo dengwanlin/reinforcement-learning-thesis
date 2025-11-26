@@ -1,0 +1,15 @@
+env,algo,trend_label,count,fraction
+CartPole-v1,a2c,post_peak_degradation,807,1.0
+CartPole-v1,ppo,post_peak_degradation,1585,1.0
+Hopper-v4,a2c,post_peak_degradation,2287,0.9926215277777778
+Hopper-v4,a2c,uncertain,17,0.007378472222222222
+Hopper-v4,ppo,post_peak_degradation,5694,0.9885416666666667
+Hopper-v4,ppo,uncertain,66,0.011458333333333333
+LunarLander-v3,a2c,post_peak_degradation,501,0.38657407407407407
+LunarLander-v3,a2c,uncertain,795,0.6134259259259259
+LunarLander-v3,ppo,post_peak_degradation,1208,0.9320987654320988
+LunarLander-v3,ppo,uncertain,88,0.06790123456790123
+LunarLanderContinuous-v3,a2c,post_peak_degradation,2770,0.8015046296296297
+LunarLanderContinuous-v3,a2c,uncertain,686,0.19849537037037038
+LunarLanderContinuous-v3,ppo,post_peak_degradation,3172,0.8260416666666667
+LunarLanderContinuous-v3,ppo,uncertain,668,0.17395833333333333
