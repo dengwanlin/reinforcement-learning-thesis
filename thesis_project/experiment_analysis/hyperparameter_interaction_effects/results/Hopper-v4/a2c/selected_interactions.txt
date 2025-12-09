@@ -1,0 +1,11 @@
+env = Hopper-v4, algo = a2c
+------------------------------------------------------------
+h1 = learning_rate, h2 = n_steps
+  interaction_score = 0.2085
+  eta_sq_partial    = 0.1627
+  delta_adj_R2      = 0.0520
+  p(ANOVA)          = 7.458e-85
+  p_change(F-test)  = 5.174e-57
+  p_beta_inter      = 5.174e-57
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/Hopper-v4/a2c/heatmaps/heatmap_learning_rate_n_steps.png
+

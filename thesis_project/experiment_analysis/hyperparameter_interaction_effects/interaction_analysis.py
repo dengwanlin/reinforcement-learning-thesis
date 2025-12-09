@@ -1,21 +1,9 @@
-"""
-Hyperparameter interaction analysis:
-- 读取 consolidated metrics 表（由 collect_runs.py 生成）
-- 对每个 env + algo + (h1, h2) 组合：
-  - 构建 2D performance surface（heatmap）
-  - 进行 two-way ANOVA 检验交互项显著性
-  - 用回归模型比较 main-effect vs interaction 模型
-- 输出：
-  - heatmap_*.csv：2D surface 数据，供画图
-  - plots/heatmap_*.pdf：简单热力图，可预览
-  - interaction_anova_summary.csv：ANOVA 结果汇总
-  - interaction_regression_summary.csv：回归结果汇总
-"""
+# hyperparameter_interaction_effects/interaction_analysis.py
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Any, Tuple
 
 import numpy as np
 import pandas as pd
@@ -26,23 +14,21 @@ from statsmodels.stats.anova import anova_lm
 from .config import ANALYSIS_OUT_DIR, METRIC_COL, HP_PAIRS, ENVS
 
 
-# 路径设置
+# 合并后的 metrics 表路径
 DATA_PATH = ANALYSIS_OUT_DIR / "interaction_metrics.csv"
-PLOTS_DIR = ANALYSIS_OUT_DIR / "plots"
-PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # --------------------------------------------------------------------------- #
-# 基础：读取数据
+# 0. 读取数据
 # --------------------------------------------------------------------------- #
 def load_data() -> pd.DataFrame:
     """
     Load the consolidated metrics table produced by collect_runs.py.
 
-    Expected columns include at least:
+    Expected columns:
       - 'env', 'algo'
       - METRIC_COL (e.g. 'max_eval_return')
-      - various hyperparameter columns (e.g. 'learning_rate', 'n_steps', ...)
+      - hyperparameter columns (e.g. 'learning_rate', 'n_steps', ...)
     """
     if not DATA_PATH.exists():
         raise FileNotFoundError(
@@ -51,10 +37,6 @@ def load_data() -> pd.DataFrame:
         )
 
     df = pd.read_csv(DATA_PATH)
-
-    # 可选：在这里对 seed 做平均（若你希望在这里平均）
-    # 目前先保持每个 seed 一行，后续 groupby 时自动平均
-
     return df
 
 
@@ -67,19 +49,7 @@ def compute_heatmap(
     """
     Compute a 2D performance surface for a given env+algo and hyperparameter pair.
 
-    Parameters
-    ----------
-    df_ea : DataFrame
-        Filtered data for a single (env, algo).
-    h1, h2 : str
-        Column names of the two hyperparameters.
-    metric_col : str
-        Column name of the performance metric.
-
-    Returns
-    -------
-    pivot : DataFrame
-        2D table with index = h2, columns = h1, values = mean(metric_col).
+    Returns a pivot table: index = h2, columns = h1, values = mean(metric_col).
     """
     if h1 not in df_ea.columns or h2 not in df_ea.columns:
         raise KeyError(f"Missing hyperparameter columns: {h1} or {h2}")
@@ -104,33 +74,44 @@ def save_heatmap(
     h2: str,
 ) -> None:
     """
-    Save the 2D performance surface as CSV and a simple PDF heatmap.
+    Save the 2D performance surface as CSV and a PNG heatmap.
+
+    目录结构：
+        results/
+          <env>/
+            <algo>/
+              heatmaps/
+                heatmap_<h1>_<h2>.csv
+                heatmap_<h1>_<h2>.png
     """
     if pivot.empty:
         print(f"[heatmap] Empty pivot for {env} / {algo} / ({h1}, {h2}), skipped.")
         return
 
-    # 保存 matrix CSV
-    mat_path = ANALYSIS_OUT_DIR / f"heatmap_{env}_{algo}_{h1}_{h2}.csv"
-    pivot.to_csv(mat_path)
+    out_dir = ANALYSIS_OUT_DIR / env / algo / "heatmaps"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 简单画一个 matplotlib heatmap 供预览
-    fig_path = PLOTS_DIR / f"heatmap_{env}_{algo}_{h1}_{h2}.pdf"
+    csv_path = out_dir / f"heatmap_{h1}_{h2}.csv"
+    png_path = out_dir / f"heatmap_{h1}_{h2}.png"
 
-    plt.figure()
+    # 保存数值数据
+    pivot.to_csv(csv_path)
+
+    # 用 matplotlib 画 heatmap（简单够用，后面你想美化可以单独写脚本）
+    plt.figure(figsize=(6, 5))
     plt.imshow(pivot.values, origin="lower", aspect="auto")
     plt.xticks(range(len(pivot.columns)), pivot.columns, rotation=45)
     plt.yticks(range(len(pivot.index)), pivot.index)
     plt.colorbar(label=METRIC_COL)
-    plt.xlabel(pivot.columns.name)
-    plt.ylabel(pivot.index.name)
-    plt.title(f"{env} {algo}: {METRIC_COL} over {h1} × {h2}")
+    plt.xlabel(pivot.columns.name or h1)
+    plt.ylabel(pivot.index.name or h2)
+    plt.title(f"{env} / {algo}: {METRIC_COL} over {h1} × {h2}")
     plt.tight_layout()
-    plt.savefig(fig_path)
+    plt.savefig(png_path, dpi=200)
     plt.close()
 
-    print(f"[heatmap] Saved CSV -> {mat_path}")
-    print(f"[heatmap] Saved PDF -> {fig_path}")
+    print(f"[heatmap] Saved CSV -> {csv_path}")
+    print(f"[heatmap] Saved PNG -> {png_path}")
 
 
 # --------------------------------------------------------------------------- #
@@ -141,7 +122,7 @@ def run_two_way_anova(
     h1: str,
     h2: str,
     metric_col: str = METRIC_COL,
-) -> Optional[Dict]:
+) -> Optional[Dict[str, Any]]:
     """
     Run a two-way ANOVA with interaction for the given hyperparameter pair.
 
@@ -173,7 +154,6 @@ def run_two_way_anova(
         print(f"[ANOVA] Failed for ({h1}, {h2}): {e}")
         return None
 
-    # interaction term key e.g. 'C(h1):C(h2)'
     inter_keys = [idx for idx in anova_res.index if ":" in idx]
     if not inter_keys:
         print(f"[ANOVA] No interaction term detected in ANOVA index for ({h1}, {h2}).")
@@ -193,7 +173,7 @@ def run_two_way_anova(
     else:
         eta_sq_partial = np.nan
 
-    result = {
+    result: Dict[str, Any] = {
         "term": inter_key,
         "F": float(f_inter),
         "p": float(p_inter),
@@ -207,6 +187,26 @@ def run_two_way_anova(
     return result
 
 
+def append_local_anova_row(row: Dict[str, Any], env: str, algo: str) -> None:
+    """
+    把单条 ANOVA 结果追加到对应 env/algo 下的 anova_summary.csv 中。
+
+    目录：
+        results/<env>/<algo>/anova/anova_summary.csv
+    """
+    out_dir = ANALYSIS_OUT_DIR / env / algo / "anova"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / "anova_summary.csv"
+
+    df_new = pd.DataFrame([row])
+    if csv_path.exists():
+        df_old = pd.read_csv(csv_path)
+        df_all = pd.concat([df_old, df_new], ignore_index=True)
+    else:
+        df_all = df_new
+    df_all.to_csv(csv_path, index=False)
+
+
 # --------------------------------------------------------------------------- #
 # 3. Regression: main-effect vs interaction model
 # --------------------------------------------------------------------------- #
@@ -214,7 +214,7 @@ def make_numeric_features(
     df_ea: pd.DataFrame,
     h1: str,
     h2: str,
-) -> tuple[pd.DataFrame, Dict[str, bool]]:
+) -> Tuple[pd.DataFrame, Dict[str, bool]]:
     """
     Construct numeric features x1, x2 from h1, h2 for regression.
 
@@ -244,18 +244,14 @@ def run_regression_comparison(
     df_ea: pd.DataFrame,
     h1: str,
     h2: str,
-) -> Optional[Dict]:
+) -> Optional[Dict[str, Any]]:
     """
     Compare main-effect vs interaction regression models:
 
       main-effect:    metric ~ x1 + x2
-      interaction:    metric ~ x1 * x2  (i.e. x1 + x2 + x1:x2)
+      interaction:    metric ~ x1 * x2
 
-    Returns
-    -------
-    result : dict or None
-        Contains adj_R2, AIC, BIC for both models, interaction coefficient,
-        and F-test for model comparison.
+    Returns a dict with adj_R2, AIC, BIC, interaction term significance, etc.
     """
     for c in (METRIC_COL, h1, h2):
         if c not in df_ea.columns:
@@ -292,7 +288,7 @@ def run_regression_comparison(
     else:
         beta_inter, p_beta_inter = np.nan, np.nan
 
-    result = {
+    result: Dict[str, Any] = {
         "adj_R2_main": float(model_main.rsquared_adj),
         "adj_R2_inter": float(model_int.rsquared_adj),
         "AIC_main": float(model_main.aic),
@@ -310,19 +306,40 @@ def run_regression_comparison(
     return result
 
 
+def append_local_regression_row(row: Dict[str, Any], env: str, algo: str) -> None:
+    """
+    把单条回归比较结果追加到对应 env/algo 的 regression_summary.csv 中。
+
+    目录：
+        results/<env>/<algo>/regression/regression_summary.csv
+    """
+    out_dir = ANALYSIS_OUT_DIR / env / algo / "regression"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / "regression_summary.csv"
+
+    df_new = pd.DataFrame([row])
+    if csv_path.exists():
+        df_old = pd.read_csv(csv_path)
+        df_all = pd.concat([df_old, df_new], ignore_index=True)
+    else:
+        df_all = df_new
+    df_all.to_csv(csv_path, index=False)
+
+
 # --------------------------------------------------------------------------- #
 # 4. 主入口：对所有 env + algo + 超参对 运行分析
 # --------------------------------------------------------------------------- #
 def run_interaction_pipeline() -> None:
     """
-    Run the full interaction analysis pipeline:
+    全流程：
 
       - Load consolidated metrics.
       - For each env, algo, hyperparameter pair:
-          * compute and save heatmap
-          * run two-way ANOVA
-          * run regression comparison
-      - Save summary CSVs for ANOVA and regression.
+          * compute & save heatmap (PNG + CSV) under env/algo/heatmaps/
+          * run ANOVA (本地 per-env/algo + 全局汇总)
+          * run regression comparison (本地 per-env/algo + 全局汇总)
+      - Save global summary CSVs (interaction_anova_summary.csv,
+        interaction_regression_summary.csv).
     """
     df = load_data()
 
@@ -347,31 +364,33 @@ def run_interaction_pipeline() -> None:
             for (h1, h2) in pairs:
                 print(f"\n[PIPELINE] env={env}, algo={algo}, pair=({h1}, {h2})")
 
-                # Heatmap
+                # 1) Heatmap
                 try:
                     pivot = compute_heatmap(df_ea, h1, h2)
                     save_heatmap(pivot, env, algo, h1, h2)
                 except Exception as e:
                     print(f"[PIPELINE] Heatmap failed for ({h1}, {h2}): {e}")
 
-                # ANOVA
+                # 2) ANOVA
                 anova_res = run_two_way_anova(df_ea, h1, h2)
                 if anova_res is not None:
                     anova_res.update({"env": env, "algo": algo, "h1": h1, "h2": h2})
                     anova_rows.append(anova_res)
+                    append_local_anova_row(anova_res, env, algo)
 
-                # Regression comparison
+                # 3) Regression comparison
                 regr_res = run_regression_comparison(df_ea, h1, h2)
                 if regr_res is not None:
                     regr_res.update({"env": env, "algo": algo, "h1": h1, "h2": h2})
                     regr_rows.append(regr_res)
+                    append_local_regression_row(regr_res, env, algo)
 
-    # Save summaries
+    # 全局汇总表（跨 env+algo）
     if anova_rows:
         anova_df = pd.DataFrame(anova_rows)
         anova_path = ANALYSIS_OUT_DIR / "interaction_anova_summary.csv"
         anova_df.to_csv(anova_path, index=False)
-        print(f"\n[PIPELINE] Saved ANOVA summary -> {anova_path}")
+        print(f"\n[PIPELINE] Saved global ANOVA summary -> {anova_path}")
     else:
         print("\n[PIPELINE] No ANOVA results were produced.")
 
@@ -379,7 +398,7 @@ def run_interaction_pipeline() -> None:
         regr_df = pd.DataFrame(regr_rows)
         regr_path = ANALYSIS_OUT_DIR / "interaction_regression_summary.csv"
         regr_df.to_csv(regr_path, index=False)
-        print(f"[PIPELINE] Saved regression summary -> {regr_path}")
+        print(f"[PIPELINE] Saved global regression summary -> {regr_path}")
     else:
         print("[PIPELINE] No regression results were produced.")
 

@@ -1,0 +1,20 @@
+env = CartPole-v1, algo = ppo
+------------------------------------------------------------
+h1 = ent_coef, h2 = batch_size
+  interaction_score = 0.1500
+  eta_sq_partial    = 0.0154
+  delta_adj_R2      = nan
+  p(ANOVA)          = 4.772e-06
+  p_change(F-test)  = 0.000e+00
+  p_beta_inter      = 6.845e-01
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/CartPole-v1/ppo/heatmaps/heatmap_ent_coef_batch_size.png
+
+h1 = learning_rate, h2 = clip_range
+  interaction_score = 0.1000
+  eta_sq_partial    = 0.1630
+  delta_adj_R2      = nan
+  p(ANOVA)          = 9.823e-62
+  p_change(F-test)  = 1.000e+00
+  p_beta_inter      = 5.982e-01
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/CartPole-v1/ppo/heatmaps/heatmap_learning_rate_clip_range.png
+

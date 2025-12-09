@@ -1,0 +1,20 @@
+env = Hopper-v4, algo = ppo
+------------------------------------------------------------
+h1 = learning_rate, h2 = clip_range
+  interaction_score = 0.2000
+  eta_sq_partial    = 0.0059
+  delta_adj_R2      = 0.0054
+  p(ANOVA)          = 6.619e-07
+  p_change(F-test)  = 6.604e-09
+  p_beta_inter      = 6.604e-09
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/Hopper-v4/ppo/heatmaps/heatmap_learning_rate_clip_range.png
+
+h1 = learning_rate, h2 = gae_lambda
+  interaction_score = 0.0000
+  eta_sq_partial    = 0.0004
+  delta_adj_R2      = -0.0001
+  p(ANOVA)          = 7.329e-01
+  p_change(F-test)  = 4.327e-01
+  p_beta_inter      = 4.327e-01
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/Hopper-v4/ppo/heatmaps/heatmap_learning_rate_gae_lambda.png
+

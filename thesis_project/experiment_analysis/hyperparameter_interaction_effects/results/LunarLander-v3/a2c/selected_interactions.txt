@@ -1,0 +1,20 @@
+env = LunarLander-v3, algo = a2c
+------------------------------------------------------------
+h1 = learning_rate, h2 = n_steps
+  interaction_score = 0.2166
+  eta_sq_partial    = 0.2244
+  delta_adj_R2      = 0.0738
+  p(ANOVA)          = 1.374e-69
+  p_change(F-test)  = 9.894e-35
+  p_beta_inter      = 9.894e-35
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/LunarLander-v3/a2c/heatmaps/heatmap_learning_rate_n_steps.png
+
+h1 = learning_rate, h2 = gae_lambda
+  interaction_score = 0.2033
+  eta_sq_partial    = 0.0667
+  delta_adj_R2      = 0.0496
+  p(ANOVA)          = 2.286e-18
+  p_change(F-test)  = 2.287e-19
+  p_beta_inter      = 2.287e-19
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/LunarLander-v3/a2c/heatmaps/heatmap_learning_rate_gae_lambda.png
+

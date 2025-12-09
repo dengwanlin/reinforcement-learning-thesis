@@ -1,0 +1,20 @@
+env = LunarLanderContinuous-v3, algo = ppo
+------------------------------------------------------------
+h1 = learning_rate, h2 = clip_range
+  interaction_score = 0.2000
+  eta_sq_partial    = 0.0031
+  delta_adj_R2      = 0.0016
+  p(ANOVA)          = 2.710e-03
+  p_change(F-test)  = 6.827e-03
+  p_beta_inter      = 6.827e-03
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/LunarLanderContinuous-v3/ppo/heatmaps/heatmap_learning_rate_clip_range.png
+
+h1 = ent_coef, h2 = batch_size
+  interaction_score = 0.0000
+  eta_sq_partial    = 0.0002
+  delta_adj_R2      = -0.0002
+  p(ANOVA)          = 6.889e-01
+  p_change(F-test)  = 6.498e-01
+  p_beta_inter      = 6.498e-01
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/LunarLanderContinuous-v3/ppo/heatmaps/heatmap_ent_coef_batch_size.png
+

@@ -1,0 +1,20 @@
+env = LunarLander-v3, algo = ppo
+------------------------------------------------------------
+h1 = learning_rate, h2 = gae_lambda
+  interaction_score = 0.2000
+  eta_sq_partial    = 0.0095
+  delta_adj_R2      = 0.0019
+  p(ANOVA)          = 1.572e-02
+  p_change(F-test)  = 4.422e-02
+  p_beta_inter      = 4.422e-02
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/LunarLander-v3/ppo/heatmaps/heatmap_learning_rate_gae_lambda.png
+
+h1 = learning_rate, h2 = clip_range
+  interaction_score = 0.0000
+  eta_sq_partial    = 0.0025
+  delta_adj_R2      = 0.0015
+  p(ANOVA)          = 2.050e-01
+  p_change(F-test)  = 7.757e-02
+  p_beta_inter      = 7.757e-02
+  heatmap_png       = /homes/sohawan2/reinforcement-learning-thesis/thesis_project/experiment_analysis/hyperparameter_interaction_effects/results/LunarLander-v3/ppo/heatmaps/heatmap_learning_rate_clip_range.png
+

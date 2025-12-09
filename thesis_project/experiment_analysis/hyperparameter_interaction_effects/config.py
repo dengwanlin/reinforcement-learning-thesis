@@ -5,7 +5,7 @@ from pathlib import Path
 # 你的实验日志根目录：下面这个你需要按自己实际情况稍微改一下
 # 比如你的 Hopper-v4/a2c/... 如果就是在 experiment_logs 下，就像这样：
 LOG_ROOT = Path(
-    "/homes/sohawan2/reinforcement-learning-thesis/thesis_project/runs_seed0"
+    "/homes/sohawan2/reinforcement-learning-thesis/thesis_project"
 )
 
 # 本模块自己的输出目录（会自动创建）
