@@ -48,7 +48,9 @@ from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from stable_baselines3.common.logger import configure as sb3_logger_config
 
 # Root directory for all runs
-ROOT = Path("/homes/sohawan2/reinforcement-learning-thesis/thesis_project/runs")
+#ROOT = Path("/homes/sohawan2/reinforcement-learning-thesis/thesis_project/runs")
+BASE_ROOT = Path("/homes/sohawan2/reinforcement-learning-thesis/thesis_project")
+
 
 ALGO_MAP = dict(ppo=PPO, a2c=A2C)
 
@@ -207,11 +209,18 @@ def main():
     # -----------------------------------------------------------------------
     # Unique run directory
     # -----------------------------------------------------------------------
+    seed_root = BASE_ROOT / f"runs_seed{seed}"    
+    seed_root.mkdir(parents=True, exist_ok=True)
     env_id = resolve_env_id(args.env)
     now = datetime.now()
     ts_base = now.strftime("%Y%m%d_%H%M%S_%f")
     unique_tag = f"{ts_base}_pid{os.getpid()}_seed{seed}"
-    run_dir = ROOT / env_id / args.algo / unique_tag
+
+
+
+
+    #run_dir = ROOT / env_id / args.algo / unique_tag
+    run_dir = seed_root / env_id / args.algo / unique_tag
     run_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -241,7 +250,9 @@ def main():
         def flush(self):
             for f in self.files:
                 f.flush()
-    sys.stdout = Tee(sys.__stdout__, open(log_file_path, "w", encoding="utf-8"))
+    #sys.stdout = Tee(sys.__stdout__, open(log_file_path, "w", encoding="utf-8"))
+    log_f = open(log_file_path, "w", encoding="utf-8")
+    sys.stdout = Tee(sys.__stdout__, log_f)
 
     # -----------------------------------------------------------------------
     # Parse and save configuration

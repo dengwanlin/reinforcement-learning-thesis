@@ -57,8 +57,7 @@ code_practice/conda_test/lunarlander_model/
 Miniconda3-latest-Linux-x86_64.sh
 code_practice/runs
 # === cache from tensorboard ===
-runs_seed0/
-runs/
+
 #*.zip
 #*.pkl
 *.tmp
@@ -73,3 +72,8 @@ code_practice/
 
 *.pdf
 *.csv
+
+runs/
+runs_seed0/
+runs_seed704453266/
+runs_seed1106730433/
