@@ -63,11 +63,11 @@ code_practice/runs
 *.tmp
 *.egg-info/
 
-*.db
+#*.db
 *.db-shm
 *.db-wal
 logs/
-docs/
+#docs/
 code_practice/
 
 *.pdf
