@@ -1,0 +1,10 @@
+{
+  "runs_root": "/homes/sohawan2/reinforcement-learning-thesis/thesis_project/runs_seed0",
+  "total_run_dirs_with_config": 20304,
+  "total_config_files_found": 20304,
+  "bad_config_count": 0,
+  "duplicate_keys_count": 0,
+  "dup_complete_dirs": 0,
+  "dup_incomplete_dirs": 0,
+  "need_rerun_keys": 0
+}
